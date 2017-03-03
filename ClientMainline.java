@@ -52,6 +52,7 @@ public class ClientMainline
 		String world = null;
 		while(world == null) {
 			world = System.console().readLine("Choose World: ").trim();
+			world = world.substring(0, 1).toUpperCase() + world.substring(1); 
 			if (world.equals("Custom") && customWorldsAllowed == true) {
 				world = gamestub.createWorld(buildWorld());
 		} 	else if (!worlds.contains(world)) {
@@ -65,13 +66,17 @@ public class ClientMainline
 
 		String input = "";
 		Boolean update = true;
-		while((!input.equals("exit"))|| (!input.equals("quit"))){
+		while(true){
 			//if (update.equals(true)) {
 			//	gamestub.status(clientstub, "");
 			//} else {
 			//	update.equals(false);
 			//}
-			input = System.console().readLine(); //input from keyboard
+			input = System.console().readLine();
+			if ((input.contains("exit")) || (input.contains("quit"))){
+				break;
+
+			} //input from keyboard
 			if (input.contains("pick")) {
 				input = input.replace("pick ", "").trim(); //replaces pick with '' and trims the spaces => gets just the input ei. 'pen' insted of drop pen.
 				update = gamestub.pick(clientstub, input);
