@@ -24,7 +24,7 @@ public class GameServerImplementation implements GameServerInterface {
   }
 
   public String createWorld(List<String> markup) {
-    String name = "Hell";
+    String name = "";
     if (worlds.size() < 3) {
       World world = new World(markup);
       worlds.put(world._name, world);
@@ -79,6 +79,7 @@ public class GameServerImplementation implements GameServerInterface {
 		  if (!message.equals("")) {
 		    status += "Message:" + " " + message + "\n";
 		  }
+      
       client.print(status);
     } catch (Exception e) { System.out.println("status: " + e); }
   	}
@@ -139,7 +140,7 @@ public class GameServerImplementation implements GameServerInterface {
 	public Boolean move(ClientInterface client, String dir) {
     try{
       String endpoint = worlds.get(client.getWorld()).moveThing(client.getLocation(), dir, client.getName());
-      updatePlayers(client.getLocation(), client.getWorld(), "");
+      //updatePlayers(client.getLocation(), client.getWorld(), "");
       client.setLocation(endpoint);
       updatePlayers(endpoint, client.getWorld(), "");
     } catch (Exception e) { System.out.println("pick: " + e); return false; }
@@ -159,6 +160,7 @@ public class GameServerImplementation implements GameServerInterface {
       for(ClientInterface client : clients)  {
         if (client.getLocation().equals(location) && client.getWorld().equals(world)) {
           status(client, message);
+         
         }
       }
     } catch (Exception e) { System.out.println("updatePlayers: " + e); }

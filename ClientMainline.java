@@ -39,12 +39,12 @@ public class ClientMainline
 		
 		List<String> worlds = gamestub.getWorlds();
 		for(String world : worlds) {
-			System.out.println(" ⦿ " + world);
+			System.out.println(world);
 		}
 
 		Boolean customWorldsAllowed = worlds.size() < 3;
 		if (customWorldsAllowed == true) {
-			System.out.println(" ⦿ Custom");
+			System.out.println("Custom");
 		} 	else {
 			System.out.println("The world server is currently at maximum capacity. Try donating some RAM.");
 		}
@@ -66,11 +66,11 @@ public class ClientMainline
 		String input = "";
 		Boolean update = true;
 		while((!input.equals("exit"))|| (!input.equals("quit"))){
-			if (update.equals(true)) {
-				gamestub.status(clientstub, "");
-			} else {
-				update.equals(false);
-			}
+			//if (update.equals(true)) {
+			//	gamestub.status(clientstub, "");
+			//} else {
+			//	update.equals(false);
+			//}
 			input = System.console().readLine(); //input from keyboard
 			if (input.contains("pick")) {
 				input = input.replace("pick ", "").trim(); //replaces pick with '' and trims the spaces => gets just the input ei. 'pen' insted of drop pen.
