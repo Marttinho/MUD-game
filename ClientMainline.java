@@ -83,14 +83,21 @@ public class ClientMainline
 			} else if (input.contains("drop")) {
 				input = input.replace("drop ", "").trim();
 				update = gamestub.drop(clientstub, input);
+			} else if (input.contains("messageall")) {
+
+
+				input = input.replace("messageall ", "").trim();
+				//String scope = input.split(" ")[0].trim();
+				//String text = input.replace(scope, "").trim();
+				update = gamestub.messaging(clientstub, input);
 			} else if (input.contains("message")) {
 
 
 				input = input.replace("message ", "").trim();
-				//String scope = input.split(" ")[0].trim();
-				//String text = input.replace(scope, "").trim();
-				update = gamestub.messaging(clientstub, input);
-			} else {
+				String who = input.split(" ")[0].trim();
+				String text = input.replace(who, "").trim();
+				update = gamestub.messagingsomeone(clientstub, who, text);
+			}else {
 				update = gamestub.move(clientstub, input);
 				}
 			}

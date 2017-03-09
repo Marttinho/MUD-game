@@ -17,4 +17,5 @@ public interface GameServerInterface extends Remote
 	public Boolean spawn(ClientInterface client, String world) throws java.rmi.RemoteException;
 	public Boolean move(ClientInterface client, String dir) throws java.rmi.RemoteException;
 	public Boolean message(ClientInterface client, String scope, String message) throws java.rmi.RemoteException;
+	public Boolean messagingsomeone(ClientInterface client, String who, String text) throws java.rmi.RemoteException;
 }
