@@ -20,7 +20,10 @@ public class Client implements ClientInterface {
     	return name;
   }
 
+  public void printmess(String mess){
+    System.out.println(mess);
 
+  }
 
 	public String getLocation() {
     	return location;

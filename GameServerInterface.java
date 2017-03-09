@@ -7,6 +7,7 @@ import java.rmi.RemoteException;
 
 public interface GameServerInterface extends Remote
 {
+	public Boolean messaging(ClientInterface client, String text) throws java.rmi.RemoteException;
 	public List<String> getWorlds() throws java.rmi.RemoteException;
 	public Boolean pick(ClientInterface client, String thing) throws java.rmi.RemoteException;
 	public String createWorld(List<String> markup) throws java.rmi.RemoteException;

@@ -87,9 +87,9 @@ public class ClientMainline
 
 
 				input = input.replace("message ", "").trim();
-				String scope = input.split(" ")[0].trim();
-				String message = input.replace(scope, "").trim();
-				update = gamestub.message(clientstub, scope, message);
+				//String scope = input.split(" ")[0].trim();
+				//String text = input.replace(scope, "").trim();
+				update = gamestub.messaging(clientstub, input);
 			} else {
 				update = gamestub.move(clientstub, input);
 				}

@@ -15,7 +15,7 @@ public interface ClientInterface extends java.rmi.Remote {
   	public void carry(String thing) throws java.rmi.RemoteException;
   	public Boolean drop(String thing) throws java.rmi.RemoteException;
 
-
+  	public void printmess(String mess) throws java.rmi.RemoteException;
 
 	public String getName() throws java.rmi.RemoteException;
 

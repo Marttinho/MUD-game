@@ -136,6 +136,18 @@ public class GameServerImplementation implements GameServerInterface {
     return response;
   }
 
+  public Boolean messaging (ClientInterface client, String text){
+    try{
+      client.printmess("Global Chat:" + " " + client.getName() + " said: " + text);
+      System.out.println(text);
+
+    }
+
+    catch (Exception e) { System.err.println(e.getMessage()); return false; }
+    return true;
+  }
+
+
 
 	public Boolean move(ClientInterface client, String dir) {
     try{
