@@ -4,6 +4,9 @@ import java.rmi.Naming;
 import java.rmi.RMISecurityManager;
 import java.net.InetAddress;
 
+/*the server mainline, binds as a stub to the rmi adress so it can be called by client, hostaname is set to 
+localhost, security is again rmishout that grants all priviledges
+*/
 public class GameServerMainline
 {
     public static void main(String args[])

@@ -9,6 +9,14 @@ import java.util.Scanner;
 import java.util.List;
 import java.util.ArrayList;
 
+/* the usual way to connect to server, as we learned on the practicals, user will be asked
+to enter name, and pick a game world, there are two predefined, Hell and Heaven, or the user 
+can create his own on runtime, then there is a 'infinite' while loop, where the code waits
+for input from user, that can be either pick a thing, drop a  thing, go 'somewhere', messageall, or message 'someuser'
+or user can exit by typing quit or exit.
+*/
+
+
 public class ClientMainline
 {
     public static void main(String args[])
@@ -25,29 +33,29 @@ public class ClientMainline
 	
 	    System.setProperty( "java.security.policy", "rmishout.policy" ) ;
 	    System.setSecurityManager( new SecurityManager() ) ;
-
+	    //using rmishout security policy from first practical, grants all priviledges
 	    System.out.println("What is your name?");
 		Scanner pn= new Scanner(System.in);
 		String pname= pn.nextLine();
-
+		//enter name
         Client client = new Client(pname,null);
-        
+        //creates client
 	    ClientInterface clientstub = (ClientInterface)UnicastRemoteObject.exportObject( client, callbackport );
-
+	    //creates stub
 	    String regURL = "rmi://" + hostname + ":" + registryport + "/GameServerMainline";
 	    GameServerInterface gamestub = (GameServerInterface)Naming.lookup( regURL );
-		
+		//local host
 		List<String> worlds = gamestub.getWorlds();
 		for(String world : worlds) {
 			System.out.println(world);
-		}
+		}//list of worlds on the server
 
 		Boolean customWorldsAllowed = worlds.size() < 3;
 		if (customWorldsAllowed == true) {
 			System.out.println("Custom");
 		} 	else {
-			System.out.println("The world server is currently at maximum capacity. Try donating some RAM.");
-		}
+			System.out.println("The world server is currently at maximum capacity");
+		}//3 custom worlds are max allowed
 
 		String world = null;
 		while(world == null) {
@@ -59,21 +67,17 @@ public class ClientMainline
 			world = null;
 			System.out.println("That is not a valid world. Try again");
 			}
-		}
+		}//promt to choose a world
 		System.out.println("Joining: " + world);
 
-		gamestub.spawn(clientstub, world);
+		gamestub.spawn(clientstub, world); //connects client to a world of his choice
 
 		String input = "";
 		Boolean update = true;
 		while(true){
-			//if (update.equals(true)) {
-			//	gamestub.status(clientstub, "");
-			//} else {
-			//	update.equals(false);
-			//}
 			input = System.console().readLine();
 			if ((input.contains("exit")) || (input.contains("quit"))){
+				update = gamestub.removePlayer(clientstub);
 				break;
 
 			} //input from keyboard
@@ -84,31 +88,30 @@ public class ClientMainline
 				input = input.replace("drop ", "").trim();
 				update = gamestub.drop(clientstub, input);
 			} else if (input.contains("messageall")) {
-
-
 				input = input.replace("messageall ", "").trim();
-				//String scope = input.split(" ")[0].trim();
-				//String text = input.replace(scope, "").trim();
 				update = gamestub.messaging(clientstub, input);
 			} else if (input.contains("message")) {
-
-
 				input = input.replace("message ", "").trim();
 				String who = input.split(" ")[0].trim();
 				String text = input.replace(who, "").trim();
 				update = gamestub.messagingsomeone(clientstub, who, text);
-			}else {
+			}else if (input.contains("go")) {
+				input = input.replace("go ", "").trim();
 				update = gamestub.move(clientstub, input);
-				}
+			}else {
+
+				System.out.println("wrong command");
 			}
+		}
 		System.out.println("exiting...");
 		System.exit(0);
 		} 
 		catch (Exception e) { System.err.println(e.getMessage()); }
-  	}
+		
+	}	
 	
 	
-    
+    //world creation functions
     private static List<String> buildWorld() {
     System.out.println("Welcome to World Creator!");
     System.out.println("Give your world a name like this:");

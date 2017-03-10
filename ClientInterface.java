@@ -24,3 +24,4 @@ public interface ClientInterface extends java.rmi.Remote {
 	public String setLocation(String newlocation) throws java.rmi.RemoteException;
 	public void print(String output) throws java.rmi.RemoteException;
 }
+/*declaring all the functions on the client side, extending java rmi remote*/

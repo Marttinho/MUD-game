@@ -16,6 +16,7 @@ public interface GameServerInterface extends Remote
 	public void status(ClientInterface client, String message) throws java.rmi.RemoteException;
 	public Boolean spawn(ClientInterface client, String world) throws java.rmi.RemoteException;
 	public Boolean move(ClientInterface client, String dir) throws java.rmi.RemoteException;
-	public Boolean message(ClientInterface client, String scope, String message) throws java.rmi.RemoteException;
 	public Boolean messagingsomeone(ClientInterface client, String who, String text) throws java.rmi.RemoteException;
+	public Boolean removePlayer(ClientInterface player) throws java.rmi.RemoteException;
 }
+/* declaring all the functions needed on the Server side, the functions messaging and messaging someone are the ones that are additional for the A4-A1*/

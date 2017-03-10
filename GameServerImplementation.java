@@ -7,6 +7,11 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.Iterator;
 
+/*implementation of all the functions needed on the serverside such as status, which gives back
+information about user location, and what is around him, the move function, the drop function, the spawn,
+and both the messaging functions
+*/
+
 public class GameServerImplementation implements GameServerInterface {
   public Map<String, World> worlds;
   List<ClientInterface> clients;
@@ -82,18 +87,9 @@ public class GameServerImplementation implements GameServerInterface {
       
       client.print(status);
     } catch (Exception e) { System.out.println("status: " + e); }
-  	}
-
-  	public Boolean message(ClientInterface client, String scope, String message) {
-		Boolean response = false;
-			try {
-				if (scope.equals("global")) {
-					updateAllPlayers("Global Chat:" + " " + client.getName() + " said: " + message);
-				} 
-				return response;
-			} 
-				catch (Exception e) { System.out.println("spawn: " + e); return false; }
-	}
+  	}//the function for the information about player, gathers everything from the players, if there is some
+      //one else at this location it lets you know, send the status string for print on the client side
+ 
 	public Boolean spawn(ClientInterface client, String world) {
     try {
       clients.add(client);
@@ -104,7 +100,7 @@ public class GameServerImplementation implements GameServerInterface {
       System.out.println(client.getName() + " is in " + client.getWorld() + " world... ");
     } catch (Exception e) { System.out.println("spawn: " + e); return false; }
     return true;
-  	}
+  	}//function to create a player in the world and updates the number of players there
 
   public Boolean pick(ClientInterface client, String thing) {
     Boolean response  = true;
@@ -119,7 +115,7 @@ public class GameServerImplementation implements GameServerInterface {
       }
     } catch (Exception e) { System.out.println("pick: " + e); return false; }
     return response;
-  }
+  }//to pick up a thing at the location
 
   public Boolean drop(ClientInterface client, String thing) {
     Boolean response  = true;
@@ -134,14 +130,15 @@ public class GameServerImplementation implements GameServerInterface {
       }
     } catch (Exception e) { System.out.println("drop: " + e); return false; }
     return response;
-  }
+  }//to drop a thing
 
   public Boolean messaging (ClientInterface client, String text){
     try{
-      client.printmess("Global Chat:" + " " + client.getName() + " said: " + text);
-      System.out.println(text);
-
+      for (ClientInterface dude : clients){
+      dude.printmess("Global Chat:" + " " + client.getName() + " said: " + text);
+      //System.out.println(text);
     }
+    }//sends message to global chat
 
     catch (Exception e) { System.err.println(e.getMessage()); return false; }
     return true;
@@ -149,8 +146,6 @@ public class GameServerImplementation implements GameServerInterface {
 
   public Boolean messagingsomeone (ClientInterface player, String who, String text){
     try{
-      //client.printmess("Global Chat:" + " " + client.getName() + " said: " + text);
-      //System.out.println(text);
       for (ClientInterface client : clients)  {
           if (client.getName().equals(who)) {
             client.printmess("Private Chat:" + " " + player.getName() + " said: " + text);
@@ -160,7 +155,7 @@ public class GameServerImplementation implements GameServerInterface {
     }
     catch (Exception e) { System.err.println(e.getMessage()); return false; }
     return true;
-  }
+  }//sends message to a single player
 
 	public Boolean move(ClientInterface client, String dir) {
     try{
@@ -170,16 +165,8 @@ public class GameServerImplementation implements GameServerInterface {
       updatePlayers(endpoint, client.getWorld(), "");
     } catch (Exception e) { System.out.println("pick: " + e); return false; }
     return true;
-  	}
-  	
-  private void updateAllPlayers(String message) {
-    try {
-      for(ClientInterface client : clients)  {
-        status(client, message);
-      }
-    } catch (Exception e) { System.out.println("updateAllPlayers: " + e); }
-  	}
-  	
+  	}//moves player from position to position
+  		
   private void updatePlayers(String location, String world, String message) {
     try {
       for(ClientInterface client : clients)  {
@@ -200,7 +187,25 @@ public class GameServerImplementation implements GameServerInterface {
       }
     } catch (Exception e) { System.out.println("isPlayer: " + e); }
     return false;
-  	}
+  	}//checks if an object is a player
+
+  public Boolean removePlayer(ClientInterface player) {
+    try {
+      String pname = player.getName();
+      String pWorld = player.getWorld();
+      clients.remove(player);
+      System.out.println(pname + " left " + pWorld);
+      for (ClientInterface dude : clients){
+      dude.printmess(pname + " has left the game");
+      //System.out.println(text);
+      }
+      
+    } 
+    catch (Exception e) { System.out.println("removePlayer: " + e); return false; }
+    
+    return false;
+  }
+
 
 
 }
