@@ -1,4 +1,8 @@
+/*
+ @author: Martin, 51444972
+ @version: 1.0.1
 
+*/
 package mud.cs3524.solutions.mud;
 
 import java.util.List;
@@ -6,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Iterator;
+
 
 /*implementation of all the functions needed on the serverside such as status, which gives back
 information about user location, and what is around him, the move function, the drop function, the spawn,
@@ -26,7 +31,16 @@ public class GameServerImplementation implements GameServerInterface {
 
   public List<String> getWorlds() {
     return new ArrayList<String>(worlds.keySet());
-  }
+  }//returns the worlds on the server
+
+  public int getPlayers(){
+    int number = 0;
+    for (ClientInterface dude : clients){
+      number++;
+
+    }
+    return number;
+  }//returns number of players on server
 
   public String createWorld(List<String> markup) {
     String name = "";
@@ -48,7 +62,7 @@ public class GameServerImplementation implements GameServerInterface {
 	public void status(ClientInterface client, String message) {
     try {
      
-		  String status = "World: " + client.getWorld() + "\n";
+		  String status = "######\nWorld: " + client.getWorld() + "\n";
 		  status += worlds.get(client.getWorld()).locationStatus(client.getLocation());
 		  List<String> things = new ArrayList<String>(worlds.get(client.getWorld()).locationThings(client.getLocation()));
 		  things.remove(client.getName());
@@ -131,11 +145,10 @@ public class GameServerImplementation implements GameServerInterface {
     } catch (Exception e) { System.out.println("drop: " + e); return false; }
     return response;
   }//to drop a thing
-
   public Boolean messaging (ClientInterface client, String text){
     try{
       for (ClientInterface dude : clients){
-      dude.printmess("Global Chat:" + " " + client.getName() + " said: " + text);
+      dude.printmess("Global messaging:" + " " + client.getName() + " said: " + text);
       //System.out.println(text);
     }
     }//sends message to global chat
@@ -148,7 +161,7 @@ public class GameServerImplementation implements GameServerInterface {
     try{
       for (ClientInterface client : clients)  {
           if (client.getName().equals(who)) {
-            client.printmess("Private Chat:" + " " + player.getName() + " said: " + text);
+            client.printmess(player.getName() + " said: " + text);
             return true;
           }
       }

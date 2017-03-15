@@ -1,0 +1,3342 @@
+%!PS-Adobe-3.0
+%%Title: ClientInterface.java, Client.java, ClientMainline.java, Edge.java, GameServerImplementation.java, GameServerInterface.java, GameServerMainline.java, Vertex.java, World.java
+%%For: Martin
+%%Creator: a2ps version 4.14
+%%CreationDate: Mon Mar 13 13:36:33 2017
+%%BoundingBox: 24 24 571 818
+%%DocumentData: Clean7Bit
+%%Orientation: Landscape
+%%Pages: 14
+%%PageOrder: Ascend
+%%DocumentMedia: A4 595 842 0 () ()
+%%DocumentNeededResources: font Courier
+%%+ font Courier-Bold
+%%+ font Helvetica
+%%+ font Helvetica-Bold
+%%+ font Symbol
+%%+ font Times-Bold
+%%+ font Times-Roman
+%%DocumentProcessColors: Black Blue Green Red 
+%%DocumentSuppliedResources: procset a2ps-color-prolog
+%%+ encoding ISO-8859-1Encoding
+%%EndComments
+/a2psdict 200 dict def
+a2psdict begin
+%%BeginProlog
+%%Copyright: (c) 1988, 89, 90, 91, 92, 93 Miguel Santana
+%%Copyright: (c) 1995, 96, 97, 98 Akim Demaille, Miguel Santana
+% Check PostScript language level.
+/languagelevel where {
+  pop /gs_languagelevel languagelevel def
+} {
+  /gs_languagelevel 1 def
+} ifelse
+
+% EPSF import as in the Red Book
+/BeginInclude {
+  /b4_Inc_state save def    		% Save state for cleanup
+  /dict_count countdictstack def	% Count objects on dict stack
+  /op_count count 1 sub def		% Count objects on operand stack 
+  userdict begin
+    0 setgray 0 setlinecap
+    1 setlinewidth 0 setlinejoin
+    10 setmiterlimit [ ] 0 setdash newpath
+    gs_languagelevel 1 ne {
+      false setstrokeadjust false setoverprint 
+    } if
+} bind def
+
+/EndInclude {
+  count op_count sub { pos } repeat	% Clean up stacks
+  countdictstack dict_count sub { end } repeat
+  b4_Inc_state restore
+} bind def
+
+/BeginEPSF {
+  BeginInclude
+  /showpage { } def
+} bind def
+
+/EndEPSF {
+  EndInclude
+} bind def
+
+% Page prefeed
+/page_prefeed {         % bool -> -
+  statusdict /prefeed known {
+    statusdict exch /prefeed exch put
+  } {
+    pop
+  } ifelse
+} bind def
+
+/deffont {
+  findfont exch scalefont def
+} bind def
+
+/reencode_font {
+  findfont reencode 2 copy definefont pop def
+} bind def
+
+% Function c-show (str => -)
+% centers text only according to x axis.
+/c-show { 
+  dup stringwidth pop
+  2 div neg 0 rmoveto
+  show
+} bind def
+
+% Function l-show (str => -)
+% prints texts so that it ends at currentpoint
+/l-show {
+  dup stringwidth pop neg 
+  0 
+  rmoveto show
+} bind def
+
+% center-fit show (str w => -)
+% show centered, and scale currentfont so that the width is less than w
+/cfshow {
+  exch dup stringwidth pop
+  % If the title is too big, try to make it smaller
+  3 2 roll 2 copy
+  gt
+  { % if, i.e. too big
+    exch div
+    currentfont exch scalefont setfont
+  } { % ifelse
+    pop pop 
+  }
+  ifelse
+  c-show			% center title
+} bind def
+
+% Return the y size of the current font
+% - => fontsize
+/currentfontsize {
+  currentfont /FontType get 0 eq {
+    currentfont /FontMatrix get 3 get
+  }{
+    currentfont /FontMatrix get 3 get 1000 mul
+  } ifelse
+} bind def
+
+% reencode the font
+% <encoding-vector> <fontdict> -> <newfontdict>
+/reencode { %def
+  dup length 5 add dict begin
+    { %forall
+      % <vector> <key> <val>
+      1 index /FID ne 
+      { def }{ pop pop } ifelse
+    } forall
+    /Encoding exch def % -
+
+    % Use the font's bounding box to determine the ascent, descent,
+    % and overall height; don't forget that these values have to be
+    % transformed using the font's matrix.
+    % We use `load' because sometimes BBox is executable, sometimes not.
+    % Since we need 4 numbers an not an array avoid BBox from being executed
+    /FontBBox load aload pop
+    FontMatrix transform /Ascent exch def pop
+    FontMatrix transform /Descent exch def pop
+    /FontHeight Ascent Descent sub def
+
+    % Get the underline position and thickness if they're defined.
+    % Use 1 if they are not defined.
+    currentdict /FontInfo 2 copy known
+    { get
+      /UnderlinePosition 2 copy % <FontInfo> /UP <FontInfo> /UP
+      2 copy known
+      { get }{ pop pop 1 } ifelse
+      0 exch FontMatrix transform exch pop
+      def % <FontInfo>
+
+      /UnderlineThickness 2 copy % <FontInfo> /UT <FontInfo> /UT
+      2 copy known
+      { get }{ pop pop 1 } ifelse
+      0 exch FontMatrix transform exch pop
+      def % <FontInfo>
+      pop % -
+    }{ pop pop
+    } ifelse
+
+    currentdict
+  end 
+} bind def
+
+% composite fonts for ASCII-EUC mixed strings
+% Version 1.2 1/31/1990
+% Original Ken'ichi HANDA (handa@etl.go.jp)
+% Modified Norio Katayama (katayama@rd.nacsis.ac.jp),1998
+% Extend & Fix Koji Nakamaru (maru@on.cs.keio.ac.jp), 1999
+% Anyone can freely copy, modify, distribute this program.
+
+/copyfont {	% font-dic extra-entry-count  copyfont  font-dic
+	1 index maxlength add dict begin
+	{	1 index /FID ne 2 index /UniqueID ne and
+		{def} {pop pop} ifelse
+	} forall
+	currentdict
+	end
+} bind def
+
+/compositefont { % ASCIIFontName EUCFontName RomanScale RomanOffset Rot(T/F) compositefont font
+    /RomanRotation exch def
+    /RomanOffset exch def
+    /RomanScale exch def
+    userdict /fixeucfont_dict known not {
+	userdict begin
+	    /fixeucfont_dict 2 dict begin
+		/UpperByteEncoding [
+		    16#00 1 16#20 { pop 0 } for
+		    16#21 1 16#28 { 16#20 sub } for
+		    16#29 1 16#2F { pop 0 } for
+		    16#30 1 16#74 { 16#27 sub } for
+		    16#75 1 16#FF { pop 0 } for
+		] def
+	        /LowerByteEncoding [
+		    16#00 1 16#A0 { pop /.notdef } for
+		    16#A1 1 16#FE { 16#80 sub 16 2 string cvrs
+				    (cXX) dup 1 4 -1 roll
+				    putinterval cvn } for
+		    /.notdef
+		] def
+		currentdict
+	    end def
+	end
+    } if
+    findfont dup /FontType get 0 eq {
+	14 dict begin
+	    %
+	    % 7+8 bit EUC font
+	    %
+	    12 dict begin
+		/EUCFont exch def
+		/FontInfo (7+8 bit EUC font) readonly def
+		/PaintType 0 def
+		/FontType 0 def
+		/FontMatrix matrix def
+		% /FontName
+		/Encoding fixeucfont_dict /UpperByteEncoding get def
+		/FMapType 2 def
+		EUCFont /WMode known
+		{ EUCFont /WMode get /WMode exch def }
+		{ /WMode 0 def } ifelse
+		/FDepVector [
+		    EUCFont /FDepVector get 0 get
+		    [ 16#21 1 16#28 {} for 16#30 1 16#74 {} for ]
+		    {
+			13 dict begin
+			    /EUCFont EUCFont def
+			    /UpperByte exch 16#80 add def	
+			    % /FontName
+			    /FontInfo (EUC lower byte font) readonly def
+			    /PaintType 0 def
+			    /FontType 3 def
+			    /FontMatrix matrix def
+			    /FontBBox {0 0 0 0} def
+			    /Encoding
+				fixeucfont_dict /LowerByteEncoding get def
+			    % /UniqueID
+			    % /WMode
+			    /BuildChar {
+				gsave
+				exch dup /EUCFont get setfont
+				/UpperByte get
+				2 string
+				dup 0 4 -1 roll put
+				dup 1 4 -1 roll put
+				dup stringwidth setcharwidth
+				0 0 moveto show
+				grestore
+			    } bind def
+			    currentdict
+			end
+			/lowerbytefont exch definefont
+		    } forall
+		] def
+		currentdict
+	    end
+	    /eucfont exch definefont
+	    exch
+	    findfont 1 copyfont dup begin
+		RomanRotation {
+			/FontMatrix FontMatrix
+			[ 0 RomanScale neg RomanScale 0 RomanOffset neg 0 ]
+			matrix concatmatrix def
+		}{
+			/FontMatrix FontMatrix
+			[ RomanScale 0 0 RomanScale 0 RomanOffset ] matrix concatmatrix
+			def
+			/CDevProc
+			    {pop pop pop pop 0 exch -1000 exch 2 div 880} def
+		} ifelse
+	    end
+	    /asciifont exch definefont
+	    exch
+	    /FDepVector [ 4 2 roll ] def
+	    /FontType 0 def
+	    /WMode 0 def
+	    /FMapType 4 def
+	    /FontMatrix matrix def
+	    /Encoding [0 1] def
+	    /FontBBox {0 0 0 0} def
+%	    /FontHeight 1.0 def % XXXX
+	    /FontHeight RomanScale 1.0 ge { RomanScale }{ 1.0 } ifelse def
+	    /Descent -0.3 def   % XXXX
+	    currentdict
+	end
+	/tmpfont exch definefont
+	pop
+	/tmpfont findfont
+    }{
+	pop findfont 0 copyfont
+    } ifelse
+} def	
+
+/slantfont {	% FontName slant-degree  slantfont  font'
+    exch findfont 1 copyfont begin
+    [ 1 0 4 -1 roll 1 0 0 ] FontMatrix exch matrix concatmatrix
+    /FontMatrix exch def
+    currentdict
+    end
+} def
+
+% Function print line number (<string> # -)
+/# {
+  gsave
+    sx cw mul neg 2 div 0 rmoveto
+    f# setfont
+    c-show
+  grestore
+} bind def
+
+% -------- Some routines to enlight plain b/w printings ---------
+
+% Underline
+% width --
+/dounderline {
+  currentpoint
+  gsave
+    moveto
+    0 currentfont /Descent get currentfontsize mul rmoveto
+    0 rlineto
+    stroke
+  grestore
+} bind def
+
+% Underline a string
+% string --
+/dounderlinestring {
+  stringwidth pop
+  dounderline
+} bind def
+
+/UL {
+  /ul exch store
+} bind def
+
+% Draw a box of WIDTH wrt current font
+% width --
+/dobox {
+  currentpoint
+  gsave
+    newpath
+    moveto
+    0 currentfont /Descent get currentfontsize mul rmoveto
+    dup 0 rlineto
+    0 currentfont /FontHeight get currentfontsize mul rlineto
+    neg 0 rlineto
+    closepath
+    stroke
+  grestore
+} bind def
+
+/BX {
+  /bx exch store
+} bind def
+
+% Box a string
+% string --
+/doboxstring {
+  stringwidth pop
+  dobox
+} bind def
+
+%
+% ------------- Color routines ---------------
+%
+/FG /setrgbcolor load def
+
+% Draw the background
+% width --
+/dobackground {
+  currentpoint
+  gsave
+    newpath
+    moveto
+    0 currentfont /Descent get currentfontsize mul rmoveto
+    dup 0 rlineto
+    0 currentfont /FontHeight get currentfontsize mul rlineto
+    neg 0 rlineto
+    closepath
+    bgcolor aload pop setrgbcolor
+    fill
+  grestore
+} bind def
+
+% Draw bg for a string
+% string --
+/dobackgroundstring {
+  stringwidth pop
+  dobackground
+} bind def
+
+
+/BG {
+  dup /bg exch store
+  { mark 4 1 roll ] /bgcolor exch store } if
+} bind def
+
+
+/Show {
+  bg { dup dobackgroundstring } if
+  ul { dup dounderlinestring } if
+  bx { dup doboxstring } if
+  show
+} bind def
+
+% Function T(ab), jumps to the n-th tabulation in the current line
+/T {
+  cw mul x0 add
+  bg { dup currentpoint pop sub dobackground } if
+  ul { dup currentpoint pop sub dounderline } if
+  bx { dup currentpoint pop sub dobox } if
+  y0 moveto
+} bind def
+
+% Function n: move to the next line
+/n {
+  /y0 y0 bfs sub store
+  x0 y0 moveto
+} bind def
+
+% Function N: show and move to the next line
+/N {
+  Show
+  /y0 y0 bfs sub store
+  x0 y0 moveto
+} bind def
+
+/S {
+  Show
+} bind def
+
+%%Copyright: (c) 1988, 89, 90, 91, 92, 93 Miguel Santana
+%%Copyright: (c) 1995, 96, 97, 98 Akim Demaille, Miguel Santana
+% Function title: prints page header.
+% <ct> <rt> <lt> are passed as argument
+/title { 
+  % 1. Draw the background
+  x v get y v get moveto
+  0 setgray
+  gsave
+    0 th 2 div neg rmoveto 
+    th setlinewidth
+    0.5 0.5 1 setrgbcolor
+    pw 0 rlineto stroke
+  grestore
+  % 2. Border it
+  gsave
+    0.7 setlinewidth
+    pw 0 rlineto
+    0 th neg rlineto
+    pw neg 0 rlineto
+    closepath stroke
+  grestore
+  % stk: ct rt lt
+  x v get y v get th sub 1 add moveto
+%%IncludeResource: font Helvetica
+  fHelvetica fnfs 0.8 mul scalefont setfont
+  % 3. The left title
+  gsave
+    dup stringwidth pop fnfs 0.8 mul add exch % leave space took on stack
+    fnfs 0.8 mul hm rmoveto
+    show			% left title
+  grestore
+  exch
+  % stk: ct ltw rt
+  % 4. the right title
+  gsave
+    dup stringwidth pop fnfs 0.8 mul add exch % leave space took on stack
+    dup
+    pw exch stringwidth pop fnfs 0.8 mul add sub
+    hm
+    rmoveto
+    show			% right title
+  grestore
+  % stk: ct ltw rtw
+  % 5. the center title
+  gsave
+    pw 3 1 roll
+    % stk: ct pw ltw rtw
+    3 copy 
+    % Move to the center of the left room
+    sub add 2 div hm rmoveto
+    % What is the available space in here?
+    add sub fnfs 0.8 mul sub fnfs 0.8 mul sub
+    % stk: ct space_left
+%%IncludeResource: font Helvetica-Bold
+  fHelvetica-Bold fnfs scalefont setfont
+    1 setgray
+    cfshow
+  grestore
+} bind def
+
+% Function border: prints virtual page border
+/border { %def
+  gsave				% print four sides
+    0 setgray
+    x v get y v get moveto
+    0.7 setlinewidth		% of the square
+    pw 0 rlineto
+    0 ph neg rlineto
+    pw neg 0 rlineto
+    closepath stroke
+  grestore
+} bind def
+
+% Function water: prints a water mark in background
+/water { %def
+  gsave
+    scx scy moveto rotate
+%%IncludeResource: font Times-Bold
+  fTimes-Bold 100 scalefont setfont
+    .97 setgray
+    dup stringwidth pop 2 div neg -50 rmoveto
+    show
+  grestore
+} bind def
+
+% Function rhead: prints the right header
+/rhead {  %def
+  lx ly moveto
+  fHelvetica fnfs 0.8 mul scalefont setfont
+  l-show
+} bind def
+
+% Function footer (cf rf lf -> -)
+/footer {
+  fHelvetica fnfs 0.8 mul scalefont setfont
+  dx dy moveto
+  show
+
+  snx sny moveto
+  l-show
+  
+  fnx fny moveto
+  c-show
+} bind def
+
+% Function print line number (<string> # -)
+/# {
+  gsave
+    sx cw mul neg 2 div 0 rmoveto
+    f# setfont
+    c-show
+  grestore
+} bind def
+%%BeginResource: procset a2ps-color-prolog 2.0 1
+
+%% Definition of the color faces.
+/p {
+  0 0 0 FG
+  false BG
+  false UL
+  false BX
+  fCourier bfs scalefont setfont
+  Show
+} bind def
+
+/sy {
+  0 0 0 FG
+  false BG
+  fSymbol bfs scalefont setfont
+  Show
+} bind def
+
+/k {
+  false BG
+  false UL
+  false BX
+  0 0 0.9 FG
+  fCourier bfs scalefont setfont
+  Show
+} bind def
+
+/K {
+  false BG
+  false UL
+  false BX
+  0 0 0.8 FG
+  fCourier-Bold bfs scalefont setfont
+  Show
+} bind def
+
+/c {
+  false BG
+  false UL
+  false BX
+  0.8 0 0 FG
+  fCourier bfs scalefont setfont
+  Show
+} bind def
+
+/C {
+  false BG
+  false UL
+  false BX
+  0.8 0 0 FG
+  fCourier-Bold bfs scalefont setfont
+  Show
+} bind def
+
+/l {
+  0 0 0 FG
+  0.8 0.8 0 true BG
+  false UL
+  false BX
+  fCourier bfs scalefont setfont
+  Show
+} bind def
+
+/L {
+  0 0 0 FG
+  1 1 0 true BG
+  false UL
+  false BX
+  fCourier-Bold bfs scalefont setfont
+  Show
+} bind def
+
+/str {
+  false BG
+  false UL
+  false BX
+  0 0.5 0 FG
+  fTimes-Roman bfs scalefont setfont
+  Show
+} bind def
+
+/e{
+  1 0 0 true BG
+  false UL
+  true BX
+  1 1 1 FG
+  fHelvetica-Bold bfs scalefont setfont
+  Show
+} bind def
+
+% Function print line number (<string> # -)
+/# {
+  gsave
+    sx cw mul 2 div neg 0 rmoveto
+    f# setfont
+    0.8 0.1 0.1 FG
+    c-show
+  grestore
+} bind def
+%%EndResource
+%%EndProlog
+%%BeginSetup
+%%IncludeResource: font Courier
+%%IncludeResource: font Courier-Bold
+%%IncludeResource: font Times-Roman
+%%IncludeResource: font Symbol
+%%BeginResource: encoding ISO-8859-1Encoding
+/ISO-8859-1Encoding [
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef 
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef 
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef 
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef 
+/space /exclam /quotedbl /numbersign /dollar /percent /ampersand /quoteright 
+/parenleft /parenright /asterisk /plus /comma /minus /period /slash 
+/zero /one /two /three /four /five /six /seven 
+/eight /nine /colon /semicolon /less /equal /greater /question 
+/at /A /B /C /D /E /F /G 
+/H /I /J /K /L /M /N /O 
+/P /Q /R /S /T /U /V /W 
+/X /Y /Z /bracketleft /backslash /bracketright /asciicircum /underscore 
+/quoteleft /a /b /c /d /e /f /g 
+/h /i /j /k /l /m /n /o 
+/p /q /r /s /t /u /v /w 
+/x /y /z /braceleft /bar /braceright /asciitilde /.notdef 
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef 
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef 
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef 
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef 
+/space /exclamdown /cent /sterling /currency /yen /brokenbar /section 
+/dieresis /copyright /ordfeminine /guillemotleft /logicalnot /hyphen /registered /macron 
+/degree /plusminus /twosuperior /threesuperior /acute /mu /paragraph /bullet 
+/cedilla /onesuperior /ordmasculine /guillemotright /onequarter /onehalf /threequarters /questiondown 
+/Agrave /Aacute /Acircumflex /Atilde /Adieresis /Aring /AE /Ccedilla 
+/Egrave /Eacute /Ecircumflex /Edieresis /Igrave /Iacute /Icircumflex /Idieresis 
+/Eth /Ntilde /Ograve /Oacute /Ocircumflex /Otilde /Odieresis /multiply 
+/Oslash /Ugrave /Uacute /Ucircumflex /Udieresis /Yacute /Thorn /germandbls 
+/agrave /aacute /acircumflex /atilde /adieresis /aring /ae /ccedilla 
+/egrave /eacute /ecircumflex /edieresis /igrave /iacute /icircumflex /idieresis 
+/eth /ntilde /ograve /oacute /ocircumflex /otilde /odieresis /divide 
+/oslash /ugrave /uacute /ucircumflex /udieresis /yacute /thorn /ydieresis 
+] def
+%%EndResource
+% Initialize page description variables.
+/sh 595 def
+/sw 842 def
+/llx 24 def
+/urx 818 def
+/ury 571 def
+/lly 24 def
+/#copies 1 def
+/th 15.000000 def
+/fnfs 11 def
+/bfs 8.005733 def
+/cw 4.803440 def
+
+% Dictionary for ISO-8859-1 support
+/iso1dict 6 dict begin
+  /fCourier ISO-8859-1Encoding /Courier reencode_font
+  /fCourier-Bold ISO-8859-1Encoding /Courier-Bold reencode_font
+  /fHelvetica ISO-8859-1Encoding /Helvetica reencode_font
+  /fHelvetica-Bold ISO-8859-1Encoding /Helvetica-Bold reencode_font
+  /fTimes-Bold ISO-8859-1Encoding /Times-Bold reencode_font
+  /fTimes-Roman ISO-8859-1Encoding /Times-Roman reencode_font
+currentdict end def
+/bgcolor [ 0 0 0 ] def
+/bg false def
+/ul false def
+/bx false def
+% The font for line numbering
+/f# /Helvetica findfont bfs .6 mul scalefont def
+/fSymbol /Symbol findfont def
+/hm fnfs 0.25 mul def
+/pw
+   cw 81.400000 mul
+def
+/ph
+   501.959430 th add
+def
+/pmw urx llx sub pw 2 mul sub 1 div def
+/pmh 0 def
+/v 0 def
+/x [
+  0
+  dup pmw add pw add
+] def
+/y [
+  pmh ph add 0 mul ph add
+  dup
+] def
+/scx sw 2 div def
+/scy sh 2 div def
+/snx urx def
+/sny lly 2 add def
+/dx llx def
+/dy sny def
+/fnx scx def
+/fny dy def
+/lx snx def
+/ly ury fnfs 0.8 mul sub def
+/sx 0 def
+/tab 8 def
+/x0 0 def
+/y0 0 def
+%%EndSetup
+
+%%Page: (1) 1
+%%BeginPageSetup
+/pagesave save def
+sh 0 translate 90 rotate
+%%EndPageSetup
+iso1dict begin
+gsave
+llx lly 12 add translate
+/v 0 store
+/x0 x v get 3.362408 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(/*) c n
+( @author: Martin, 51444972) N
+( @version: 1.0.1) N
+() N
+(*/) N
+() p n
+() N
+(package) K
+( mud.cs3524.solutions.mud;) p n
+() N
+(import) K
+( java.util.List;) p n
+(import) K
+( java.rmi.Remote;) p n
+(import) K
+( java.rmi.RemoteException;) p n
+() N
+(public) K
+( ) p
+(interface) K
+( ) p
+(ClientInterface) L
+( ) p
+(extends) K
+( java.rmi.Remote {) p n
+() S 8 T () S
+(public) K
+( String getWorld\(\) ) p
+(throws) K
+( java.rmi.RemoteException;) p n
+(  ) S 8 T () S
+(public) K
+( String setWorld\(String newWorld\) ) p
+(throws) K
+( java.rmi.RemoteException;) p n
+() N
+(  ) S 8 T () S
+(public) K
+( List<String> getThings\(\) ) p
+(throws) K
+( java.rmi.RemoteException;) p n
+(  ) S 8 T () S
+(public) K
+( ) p
+(void) k
+( carry\(String thing\) ) p
+(throws) K
+( java.rmi.RemoteException;) p n
+(  ) S 8 T () S
+(public) K
+( Boolean drop\(String thing\) ) p
+(throws) K
+( java.rmi.RemoteException;) p n
+() N
+(  ) S 8 T () S
+(public) K
+( ) p
+(void) k
+( printmess\(String mess\) ) p
+(throws) K
+( java.rmi.RemoteException;) p n
+() N
+() S 8 T () S
+(public) K
+( String getName\(\) ) p
+(throws) K
+( java.rmi.RemoteException;) p n
+() N
+() S 8 T () S
+(public) K
+( String getLocation\(\) ) p
+(throws) K
+( java.rmi.RemoteException;) p n
+() N
+() S 8 T () S
+(public) K
+( String setLocation\(String newlocation\) ) p
+(throws) K
+( java.rmi.RemoteExce) p n
+(ption;) N
+() S 8 T () S
+(public) K
+( ) p
+(void) k
+( print\(String output\) ) p
+(throws) K
+( java.rmi.RemoteException;) p n
+(}) N
+(/*declaring all the functions on the client side, extending java rmi remote*/) c
+(ClientInterface.java) (Page 1/1) (Mar 13, 17 13:32) title
+border
+grestore
+(Printed by Martin) rhead
+(ClientInterface.java) (1/14) (Monday March 13, 2017) footer
+end % of iso1dict
+pagesave restore
+showpage
+%%Page: (1-2) 2
+%%BeginPageSetup
+/pagesave save def
+sh 0 translate 90 rotate
+%%EndPageSetup
+iso1dict begin
+gsave
+llx lly 12 add translate
+/v 0 store
+/x0 x v get 3.362408 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(/*) c n
+( @author: Martin, 51444972) N
+( @version: 1.0.1) N
+() N
+(*/) N
+(package) K
+( mud.cs3524.solutions.mud;) p n
+() N
+(import) K
+( java.util.List;) p n
+(import) K
+( java.util.ArrayList;) p n
+(/* implementation of all the functions defined in the interface, all the functio) c n
+(n that) N
+(I need for client to work, as well as print function, when i want something to p) N
+(rint) N
+(on the clients side.) N
+(*/) N
+(public) K
+( ) p
+(class) K
+( ) p
+(Client) L
+( ) p
+(implements) K
+( ClientInterface {) p n
+() S 8 T () S
+(private) K
+( String name;) p n
+(  ) S
+(private) K
+( String location;) p n
+(  ) S
+(private) K
+( String world;) p n
+(  ) S
+(private) K
+( List<String> things = ) p
+(new) K
+( ArrayList<String>\(\);) p n
+() S 8 T () N
+(  ) S
+(public) K
+( Client\(String pname, String startingLocation\) {) p n
+(    ) S 8 T (name = pname;) N
+(    ) S 8 T (location = startingLocation;) N
+(  }) S
+(// defines player by name and assigned starting location of the world) c n
+() p n
+() N
+(  ) S
+(public) K
+( String getName\(\) {) p n
+(    ) S 8 T () S
+(return) K
+( name;) p n
+(  }) S
+(// getname function, used in messaging) c n
+() p n
+(  ) S
+(public) K
+( ) p
+(void) k
+( printmess\(String mess\){) p n
+(    System.out.println\(mess\);) N
+() N
+(  }) S
+(//print message function, used for both global and private messaging) c n
+() p n
+() S 8 T () S
+(public) K
+( String getLocation\(\) {) p n
+(    ) S 8 T () S
+(return) K
+( location;) p n
+(  ) S 8 T (}) S
+(// to get location of a player in the world) c n
+() p n
+() N
+(  ) S
+(public) K
+( String setLocation\(String newLocation\) {) p n
+(    ) S 8 T () S
+(return) K
+( location = newLocation;) p n
+(  }) S
+(// to move player in the world) c n
+() p n
+(  ) S
+(public) K
+( ) p
+(void) k
+( print\(String output\){) p n
+(    ) N
+(    System.out.print\(output\);) N
+(    ) N
+(  } ) S
+(// to print players status after each move, the same as printmess, but its m) c n
+(ore readible this way) N
+() p n
+(  ) S
+(public) K
+( String getWorld\(\) {) p n
+(    ) S
+(return) K
+( world;) p n
+(  }) S
+(//to find out in which world a player is ) c n
+() p n
+(  ) S
+(public) K
+( String setWorld\(String newWorld\) {) p n
+(    ) S
+(return) K
+( world = newWorld;) p n
+(  }) S
+(//to spawn player in world) c n
+() p n
+(  ) S
+(public) K
+( List<String> getThings\(\) {) p n
+(    ) S
+(return) K
+( things;) p n
+(Client.java) (Page 1/2) (Mar 13, 17 13:31) title
+border
+/v 1 store
+/x0 x v get 3.362408 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(  }) p
+(//to get things at given location) c n
+() p n
+(  ) S
+(public) K
+( ) p
+(void) k
+( carry\(String thing\) {) p n
+(    things.add\(thing\);) N
+(  }) S
+(// to pick up things, and add them to a bag) c n
+() p n
+(  ) S
+(public) K
+( Boolean drop\(String thing\) {) p n
+(    ) S
+(if) K
+( \(things.contains\(thing\)\) {) p n
+(      things.remove\(thing\);) N
+(      ) S
+(return) K
+( ) p
+(true) k
+(;) p n
+(    } ) S
+(else) K
+( { ) p
+(return) K
+( ) p
+(false) k
+(; }) p n
+(  }) S
+(// to drop things) c n
+(}) p
+(Client.java) (Page 2/2) (Mar 13, 17 13:31) title
+border
+grestore
+(Printed by Martin) rhead
+(Client.java) (2/14) (Monday March 13, 2017) footer
+end % of iso1dict
+pagesave restore
+showpage
+%%Page: (1-2) 3
+%%BeginPageSetup
+/pagesave save def
+sh 0 translate 90 rotate
+%%EndPageSetup
+iso1dict begin
+gsave
+llx lly 12 add translate
+/v 0 store
+/x0 x v get 3.362408 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(/*) c n
+( @author: Martin, 51444972) N
+( @version: 1.0.1) N
+() N
+(*/) N
+() p n
+() N
+(package) K
+( mud.cs3524.solutions.mud;) p n
+() N
+(import) K
+( java.rmi.Naming;) p n
+(import) K
+( java.lang.SecurityManager;) p n
+(import) K
+( java.rmi.server.UnicastRemoteObject;) p n
+(import) K
+( java.io.*;) p n
+(import) K
+( java.util.Scanner;) p n
+(import) K
+( java.util.List;) p n
+(import) K
+( java.util.ArrayList;) p n
+() N
+(/* the usual way to connect to server, as we learned on the practicals, user wil) c n
+(l be asked) N
+(to enter name, and pick a game world, there are two predefined, Hell and Heaven,) N
+( or the user ) N
+(can create his own on runtime, then there is a 'infinite' while loop, where the ) N
+(code waits) N
+(for input from user, that can be either pick a thing, drop a  thing, go 'somewhe) N
+(re', messageall, or message 'someuser') N
+(or user can exit by typing quit or exit.) N
+(*/) N
+() p n
+() N
+(public) K
+( ) p
+(class) K
+( ) p
+(ClientMainline) L n
+({) p n
+(    ) S
+(public) K
+( ) p
+(static) K
+( ) p
+(void) k
+( main\(String args[]\)) p n
+(    {) N
+() S 8 T () S
+(if) K
+( \(args.length < 3\) {) p n
+() S 8 T (    System.err.println\( ") S
+(Usage:\\njava ClientMainline <registryhost> <registryport> <callback) str n
+(port>) S
+(" \) ;) p n
+() S 8 T (    ) S
+(return) K
+(;) p n
+() S 8 T (}) N
+() N
+() S 8 T () S
+(try) K
+( {) p n
+() S 8 T (    String hostname = args[0];) N
+() S 8 T (    ) S
+(int) k
+( registryport = Integer.parseInt\( args[1] \) ;) p n
+() S 8 T (    ) S
+(int) k
+( callbackport = Integer.parseInt\( args[2] \) ;) p n
+() S 8 T () N
+() S 8 T (    System.setProperty\( ") S
+(java.security.policy) str
+(", ") p
+(rmishout.policy) str
+(" \) ;) p n
+() S 8 T (    System.setSecurityManager\( ) S
+(new) K
+( SecurityManager\(\) \) ;) p n
+() S 8 T (    ) S
+(//using rmishout security policy from first practical, grants all pr) c n
+(iviledges) N
+() p 8 T (    System.out.println\(") S
+(What is your name?) str
+("\);) p n
+() S 8 T () S 16 T (Scanner pn= ) S
+(new) K
+( Scanner\(System.in\);) p n
+() S 8 T () S 16 T (String pname= pn.nextLine\(\);) N
+() S 8 T () S 16 T () S
+(//enter name) c n
+(        Client client = ) p
+(new) K
+( Client\(pname,) p
+(null) k
+(\);) p n
+(        ) S
+(//creates client) c n
+() p 8 T (    ClientInterface clientstub = \(ClientInterface\)UnicastRemoteObject.ex) N
+(portObject\( client, callbackport \);) N
+() S 8 T (    ) S
+(//creates stub) c n
+() p 8 T (    String regURL = ") S
+(rmi://) str
+(" + hostname + ") p
+(:) str
+(" + registryport + ") p
+(/GameServerM) str n
+(ainline) S
+(";) p n
+() S 8 T (    GameServerInterface gamestub = \(GameServerInterface\)Naming.lookup\( r) N
+(egURL \);) N
+() S 8 T () S 16 T () S
+(//local host) c n
+(ClientMainline.java) (Page 1/3) (Mar 13, 17 13:31) title
+border
+/v 1 store
+/x0 x v get 3.362408 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+() p 8 T () S 16 T (List<String> worlds = gamestub.getWorlds\(\);) N
+() S 8 T () S 16 T () S
+(for) K
+(\(String world : worlds\) {) p n
+() S 8 T () S 16 T () S 24 T (System.out.println\(world\);) N
+() S 8 T () S 16 T (}) S
+(//list of worlds on the server) c n
+() p n
+() S 8 T () S 16 T (Boolean customWorldsAllowed = worlds.size\(\) < 3;) N
+() S 8 T () S 16 T () S
+(if) K
+( \(customWorldsAllowed == ) p
+(true) k
+(\) {) p n
+() S 8 T () S 16 T () S 24 T (System.out.println\(") S
+(Custom) str
+("\);) p n
+() S 8 T () S 16 T (} ) S 24 T () S
+(else) K
+( {) p n
+() S 8 T () S 16 T () S 24 T (System.out.println\(") S
+(The world server is currently at maximum capacity) str
+(") p n
+(\);) N
+() S 8 T () S 16 T (}) S
+(//3 custom worlds are max allowed) c n
+() p n
+() S 8 T () S 16 T (String world = ) S
+(null) k
+(;) p n
+() S 8 T () S 16 T () S
+(while) K
+(\(world == ) p
+(null) k
+(\) {) p n
+() S 8 T () S 16 T () S 24 T (world = System.console\(\).readLine\(") S
+(Choose World: ) str
+("\).trim\(\);) p n
+() S 8 T () S 16 T () S 24 T (world = world.substring\(0, 1\).toUpperCase\(\) + world.subs) N
+(tring\(1\); ) N
+() S 8 T () S 16 T () S 24 T () S
+(if) K
+( \(world.equals\(") p
+(Custom) str
+("\) && customWorldsAllowed == ) p
+(tru) k n
+(e) S
+(\) {) p n
+() S 8 T () S 16 T () S 24 T () S 32 T (world = gamestub.createWorld\(buildWorld\(\)\);) N
+() S 8 T () S 16 T (} ) S 24 T () S
+(else) K
+( ) p
+(if) K
+( \(!worlds.contains\(world\)\) {) p n
+() S 8 T () S 16 T () S 24 T (world = ) S
+(null) k
+(;) p n
+() S 8 T () S 16 T () S 24 T (System.out.println\(") S
+(That is not a valid world. Try again) str
+("\);) p n
+() S 8 T () S 16 T () S 24 T (}) N
+() S 8 T () S 16 T (}) S
+(//promt to choose a world) c n
+() p 8 T () S 16 T (System.out.println\(") S
+(Joining: ) str
+(" + world\);) p n
+() N
+() S 8 T () S 16 T (gamestub.spawn\(clientstub, world\); ) S
+(//connects client to a world ) c n
+(of his choice) N
+() p n
+() S 8 T () S 16 T (String input = "";) N
+() S 8 T () S 16 T (Boolean update = ) S
+(true) k
+(;) p n
+() S 8 T () S 16 T () S
+(while) K
+(\() p
+(true) k
+(\){) p n
+() S 8 T () S 16 T () S 24 T (input = System.console\(\).readLine\(\);) N
+() S 8 T () S 16 T () S 24 T () S
+(if) K
+( \(\(input.contains\(") p
+(exit) str
+("\)\) || \(input.contains\(") p
+(quit) str
+("\)\)\){) p n
+() S 8 T () S 16 T () S 24 T () S 32 T (update = gamestub.removePlayer\(clientstub\);) N
+() S 8 T () S 16 T () S 24 T () S 32 T () S
+(break) K
+(;) p n
+() N
+() S 8 T () S 16 T () S 24 T (} ) S
+(//input from keyboard) c n
+() p 8 T () S 16 T () S 24 T () S
+(if) K
+( \(input.contains\(") p
+(pick) str
+("\)\) {) p n
+() S 8 T () S 16 T () S 24 T () S 32 T (input = input.replace\(") S
+(pick ) str
+(", ""\).trim\(\); ) p
+(//repl) c n
+(aces pick with '' and trims the spaces => gets just the input ei. 'pen' insted o) N
+(f drop pen.) N
+() p 8 T () S 16 T () S 24 T () S 32 T (update = gamestub.pick\(clientstub, input\);) N
+() S 8 T () S 16 T () S 24 T (} ) S
+(else) K
+( ) p
+(if) K
+( \(input.contains\(") p
+(drop) str
+("\)\) {) p n
+() S 8 T () S 16 T () S 24 T () S 32 T (input = input.replace\(") S
+(drop ) str
+(", ""\).trim\(\);) p n
+() S 8 T () S 16 T () S 24 T () S 32 T (update = gamestub.drop\(clientstub, input\);) N
+() S 8 T () S 16 T () S 24 T (} ) S
+(else) K
+( ) p
+(if) K
+( \(input.contains\(") p
+(messageall) str
+("\)\) {) p n
+() S 8 T () S 16 T () S 24 T () S 32 T (input = input.replace\(") S
+(messageall ) str
+(", ""\).trim\(\);) p n
+() S 8 T () S 16 T () S 24 T () S 32 T (update = gamestub.messaging\(clientstub, input\);) N
+() S 8 T () S 16 T () S 24 T (} ) S
+(else) K
+( ) p
+(if) K
+( \(input.contains\(") p
+(message) str
+("\)\) {) p n
+() S 8 T () S 16 T () S 24 T () S 32 T (input = input.replace\(") S
+(message ) str
+(", ""\).trim\(\);) p n
+() S 8 T () S 16 T () S 24 T () S 32 T (String who = input.split\(") S
+( ) str
+("\)[0].trim\(\);) p n
+() S 8 T () S 16 T () S 24 T () S 32 T (String text = input.replace\(who, ""\).trim\(\);) N
+() S 8 T () S 16 T () S 24 T () S 32 T (update = gamestub.messagingsomeone\(clientstub, w) N
+(ho, text\);) N
+() S 8 T () S 16 T () S 24 T (}) S
+(else) K
+( ) p
+(if) K
+( \(input.contains\(") p
+(go) str
+("\)\) {) p n
+() S 8 T () S 16 T () S 24 T () S 32 T (input = input.replace\(") S
+(go ) str
+(", ""\).trim\(\);) p n
+() S 8 T () S 16 T () S 24 T () S 32 T (update = gamestub.move\(clientstub, input\);) N
+() S 8 T () S 16 T () S 24 T (}) S
+(else) K
+( ) p
+(if) K
+( \(input.contains\(") p
+(?) str
+("\)\) {) p n
+() S 8 T () S 16 T () S 24 T () S 32 T (System.out.println\(") S
+(go <somewhere>\\ pick <thing>\\ drop <th) str n
+(ClientMainline.java) (Page 2/3) (Mar 13, 17 13:31) title
+border
+grestore
+(Printed by Martin) rhead
+(ClientMainline.java) (3/14) (Monday March 13, 2017) footer
+end % of iso1dict
+pagesave restore
+showpage
+%%Page: (3) 4
+%%BeginPageSetup
+/pagesave save def
+sh 0 translate 90 rotate
+%%EndPageSetup
+iso1dict begin
+gsave
+llx lly 12 add translate
+/v 0 store
+/x0 x v get 3.362408 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(ing>\\ messageall <textOFmessage>\\ message <player> <text> ) str
+("\)) p n
+() S 8 T () S 16 T () S 24 T (}) S
+(else) K
+( {) p n
+() N
+() S 8 T () S 16 T () S 24 T () S 32 T (System.out.println\(") S
+(wrong command\\ for help try '?' ) str
+("\);) p n
+() S 8 T () S 16 T () S 24 T (}) N
+() S 8 T () S 16 T (}) N
+() S 8 T () S 16 T (System.out.println\(") S
+(exiting...) str
+("\);) p n
+() S 8 T () S 16 T (System.exit\(0\);) N
+() S 8 T () S 16 T (} ) N
+() S 8 T () S 16 T () S
+(catch) K
+( \(Exception e\) { System.err.println\(e.getMessage\(\)\); }) p n
+() S 8 T () S 16 T () N
+() S 8 T (}) S 16 T () N
+() S 8 T () N
+() S 8 T () N
+(    ) S
+(//world creation functions) c n
+(    ) p
+(private) K
+( ) p
+(static) K
+( List<String> buildWorld\(\) {) p n
+(    System.out.println\(") S
+(Welcome to World Creator!) str
+("\);) p n
+(    System.out.println\(") S
+(Give your world a name like this:) str
+("\);) p n
+(    System.out.println\(") S
+(name: World) str
+("\);) p n
+(    System.out.println\(") S
+(Add links between places like this:) str
+("\);) p n
+(    System.out.println\(") S
+(edge: A action B action description) str
+("\);) p n
+(    System.out.println\(") S
+(Give places names like this:) str
+("\);) p n
+(    System.out.println\(") S
+(message: A the name of the place) str
+("\);) p n
+(    System.out.println\(") S
+(Place starting objects like this:) str
+("\);) p n
+(    System.out.println\(") S
+(thing: A artifact) str
+("\);) p n
+(    System.out.println\(") S
+(Set a starting location like this:) str
+("\);) p n
+(    System.out.println\(") S
+(start: A) str
+("\);) p n
+(    System.out.println\(") S
+(When you're done type exit) str
+("\);) p n
+(    System.out.println\(") S
+(Remember:You must complete all the attributes) str
+("\);) p n
+() N
+(    String input = "";) N
+(    List<String> markup = ) S
+(new) K
+( ArrayList<String>\(\);) p n
+(    ) S
+(while) K
+(\(\(!input.equals\(") p
+(exit) str
+("\)\)) p n
+(        || \(markupContains\(markup, ") S
+(name: ) str
+("\).equals\() p
+(false) k
+(\)\)) p n
+(        || \(markupContains\(markup, ") S
+(start: ) str
+("\).equals\() p
+(false) k
+(\)\)) p n
+(        || \(markupContains\(markup, ") S
+(edge: ) str
+("\).equals\() p
+(false) k
+(\)\)) p n
+(        || \(markupContains\(markup, ") S
+(message: ) str
+("\).equals\() p
+(false) k
+(\)\)\) {) p n
+(      input = System.console\(\).readLine\(") S
+(\342M-^^\244 ) str
+("\).trim\(\);) p n
+(      markup.add\(input\);) N
+(    }) N
+(    System.out.println\(") S
+(done building) str
+("\);) p n
+(    ) S
+(return) K
+( markup;) p n
+(  }) N
+() N
+(  ) S
+(public) K
+( ) p
+(static) K
+( Boolean markupContains\(List<String> markup, String subString\) {) p n
+(    Boolean result = ) S
+(false) k
+(;) p n
+(    ) S
+(for) K
+(\(String statement : markup\) {) p n
+(      ) S
+(if) K
+( \(statement.contains\(subString\)\) { result = ) p
+(true) k
+(; }) p n
+(    }) N
+(    ) S
+(return) K
+( result;) p n
+(  }) N
+(}) S
+(ClientMainline.java) (Page 3/3) (Mar 13, 17 13:31) title
+border
+grestore
+(Printed by Martin) rhead
+(ClientMainline.java) (4/14) (Monday March 13, 2017) footer
+end % of iso1dict
+pagesave restore
+showpage
+%%Page: (1) 5
+%%BeginPageSetup
+/pagesave save def
+sh 0 translate 90 rotate
+%%EndPageSetup
+iso1dict begin
+gsave
+llx lly 12 add translate
+/v 0 store
+/x0 x v get 3.362408 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(/*) c n
+( @author: Martin, 51444972) N
+( @version: 1.0.1) N
+() N
+(*/) N
+(package) K
+( mud.cs3524.solutions.mud;) p n
+() N
+(// Represents an path in the MUD \(an edge in a graph\).) c n
+(class) K
+( ) p
+(Edge) L n
+({) p n
+(    ) S
+(public) K
+( Vertex _dest;   ) p
+(// Your destination if you walk down this path) c n
+(    ) p
+(public) K
+( String _view;   ) p
+(// What you see if you look down this path) c n
+(    ) p n
+(    ) S
+(public) K
+( Edge\( Vertex d, String v \)) p n
+(    {) N
+(        _dest = d;) N
+() S 8 T () S 16 T (_view = v;) N
+(    }) N
+(}) N
+(/* file that was provided*/) c n
+(Edge.java) (Page 1/1) (Mar 13, 17 13:32) title
+border
+grestore
+(Printed by Martin) rhead
+(Edge.java) (5/14) (Monday March 13, 2017) footer
+end % of iso1dict
+pagesave restore
+showpage
+%%Page: (1-2) 6
+%%BeginPageSetup
+/pagesave save def
+sh 0 translate 90 rotate
+%%EndPageSetup
+iso1dict begin
+gsave
+llx lly 12 add translate
+/v 0 store
+/x0 x v get 3.362408 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(/*) c n
+( @author: Martin, 51444972) N
+( @version: 1.0.1) N
+() N
+(*/) N
+(package) K
+( mud.cs3524.solutions.mud;) p n
+() N
+(import) K
+( java.util.List;) p n
+(import) K
+( java.util.ArrayList;) p n
+(import) K
+( java.util.Map;) p n
+(import) K
+( java.util.HashMap;) p n
+(import) K
+( java.util.Iterator;) p n
+() N
+(/*implementation of all the functions needed on the serverside such as status, w) c n
+(hich gives back) N
+(information about user location, and what is around him, the move function, the ) N
+(drop function, the spawn,) N
+(and both the messaging functions) N
+(*/) N
+() p n
+(public) K
+( ) p
+(class) K
+( ) p
+(GameServerImplementation) L
+( ) p
+(implements) K
+( GameServerInterface {) p n
+(  ) S
+(public) K
+( Map<String, World> worlds;) p n
+(  List<ClientInterface> clients;) N
+() N
+(  ) S
+(public) K
+( GameServerImplementation\(\) {) p n
+(    clients = ) S
+(new) K
+( ArrayList<ClientInterface>\(\);) p n
+(    worlds = ) S
+(new) K
+( HashMap<String, World>\(\);) p n
+() N
+(    worlds.put\(") S
+(Hell) str
+(", ) p
+(new) K
+( World\(") p
+(hell.world) str
+("\)\);) p n
+(    worlds.put\(") S
+(Heaven) str
+(", ) p
+(new) K
+( World\(") p
+(heaven.world) str
+("\)\);) p n
+(  }) N
+() N
+(  ) S
+(public) K
+( List<String> getWorlds\(\) {) p n
+(    ) S
+(return) K
+( ) p
+(new) K
+( ArrayList<String>\(worlds.keySet\(\)\);) p n
+(  }) N
+() N
+(  ) S
+(public) K
+( String createWorld\(List<String> markup\) {) p n
+(    String name = "";) N
+(    ) S
+(if) K
+( \(worlds.size\(\) < 3\) {) p n
+(      World world = ) S
+(new) K
+( World\(markup\);) p n
+(      worlds.put\(world._name, world\);) N
+(      name = world._name;) N
+(    }) N
+(    ) S
+(return) K
+( name;) p n
+(  }) N
+() N
+(  ) S
+(public) K
+( ) p
+(void) k
+( exportWorlds\(\) {) p n
+(    System.out.println\(") S
+(Exporting worlds...) str
+("\);) p n
+(    ) S
+(for) K
+(\(World world : worlds.values\(\)\) {) p n
+(      world.export\(\);) N
+(    }) N
+(  }) N
+() N
+() S 8 T () S
+(public) K
+( ) p
+(void) k
+( status\(ClientInterface client, String message\) {) p n
+(    ) S
+(try) K
+( {) p n
+(     ) N
+() S 8 T () S 16 T (  String status = ") S
+(World: ) str
+(" + client.getWorld\(\) + ") p
+(\\n) str
+(";) p n
+() S 8 T () S 16 T (  status += worlds.get\(client.getWorld\(\)\).locationStatus\(client.) N
+(getLocation\(\)\);) N
+() S 8 T () S 16 T (  List<String> things = ) S
+(new) K
+( ArrayList<String>\(worlds.get\(client.) p n
+(getWorld\(\)\).locationThings\(client.getLocation\(\)\)\);) N
+() S 8 T () S 16 T (  things.remove\(client.getName\(\)\);) N
+(GameServerImplementation.java) (Page 1/4) (Mar 13, 17 13:31) title
+border
+/v 1 store
+/x0 x v get 3.362408 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+() p n
+() S 8 T () S 16 T (  String strThings = "";) N
+() S 8 T () S 16 T (  String strPlayers = "";) N
+() S 8 T () S 16 T (  String strBag = "";) N
+() N
+() S 8 T () S 16 T (  ) S
+(for) K
+(\(String thing : things\) {) p n
+() S 8 T () S 16 T (    ) S
+(if) K
+( \(isClient\(thing\).equals\() p
+(true) k
+(\)\) {) p n
+() S 8 T () S 16 T (      strPlayers += thing + ") S
+( ) str
+(";) p n
+() S 8 T () S 16 T (    } ) S
+(else) K
+( {) p n
+() S 8 T () S 16 T (      strThings += thing + ") S
+( ) str
+(";) p n
+() S 8 T () S 16 T (    }) N
+() S 8 T () S 16 T (  }) N
+() N
+() S 8 T () S 16 T (  ) S
+(for) K
+(\(String thing : client.getThings\(\)\) {) p n
+() S 8 T () S 16 T (    strBag += thing + ") S
+( ) str
+(";) p n
+() S 8 T () S 16 T (  }) N
+() N
+() S 8 T () S 16 T (  ) S
+(if) K
+( \(!strThings.equals\(""\)\) {) p n
+() S 8 T () S 16 T (    status += ") S
+(Objects:) str
+(" + ") p
+( ) str
+(" + strThings + ") p
+(\\n) str
+(";) p n
+() S 8 T () S 16 T (  }) N
+() N
+() S 8 T () S 16 T (  ) S
+(if) K
+( \(!strPlayers.equals\(""\)\) {) p n
+() S 8 T () S 16 T (    status += ") S
+(Players:) str
+(" + ") p
+( ) str
+(" + strPlayers + ") p
+(\\n) str
+(";) p n
+() S 8 T () S 16 T (  }) N
+() N
+() S 8 T () S 16 T (  ) S
+(if) K
+( \(!strBag.equals\(""\)\) {) p n
+() S 8 T () S 16 T (    status += ") S
+(Bag:) str
+(" + ") p
+( ) str
+(" + strBag + ") p
+(\\n) str
+(";) p n
+() S 8 T () S 16 T (  }) N
+() N
+() S 8 T () S 16 T (  ) S
+(if) K
+( \(!message.equals\(""\)\) {) p n
+() S 8 T () S 16 T (    status += ") S
+(Message:) str
+(" + ") p
+( ) str
+(" + message + ") p
+(\\n) str
+(";) p n
+() S 8 T () S 16 T (  }) N
+(      ) N
+(      client.print\(status\);) N
+(    } ) S
+(catch) K
+( \(Exception e\) { System.out.println\(") p
+(status: ) str
+(" + e\); }) p n
+(  ) S 8 T (}) S
+(//the function for the information about player, gathers everything fro) c n
+(m the players, if there is some) N
+(      ) p
+(//one else at this location it lets you know, send the status string for p) c n
+(rint on the client side) N
+( ) p n
+() S 8 T () S
+(public) K
+( Boolean spawn\(ClientInterface client, String world\) {) p n
+(    ) S
+(try) K
+( {) p n
+(      clients.add\(client\);) N
+(      client.setWorld\(world\);) N
+(      client.setLocation\(worlds.get\(client.getWorld\(\)\).startLocation\(\)\);) N
+(      worlds.get\(client.getWorld\(\)\).addThing\(worlds.get\(client.getWorld\(\)\).start) N
+(Location\(\), client.getName\(\)\);) N
+(      updatePlayers\(worlds.get\(client.getWorld\(\)\).startLocation\(\), client.getWor) N
+(ld\(\), ""\);) N
+(      System.out.println\(client.getName\(\) + ") S
+( is in ) str
+(" + client.getWorld\(\) + ") p
+( world... ) str
+() p n
+("\);) N
+(    } ) S
+(catch) K
+( \(Exception e\) { System.out.println\(") p
+(spawn: ) str
+(" + e\); ) p
+(return) K
+( ) p
+(false) k
+(; }) p n
+(    ) S
+(return) K
+( ) p
+(true) k
+(;) p n
+(  ) S 8 T (}) S
+(//function to create a player in the world and updates the number of pl) c n
+(ayers there) N
+() p n
+(  ) S
+(public) K
+( Boolean pick\(ClientInterface client, String thing\) {) p n
+(    Boolean response  = ) S
+(true) k
+(;) p n
+(    ) S
+(try) K
+( {) p n
+(      ) S
+(if) K
+( \(isClient\(thing\).equals\() p
+(false) k
+(\) && worlds.get\(client.getWorld\(\)\).locatio) p n
+(nThings\(client.getLocation\(\)\).contains\(thing\)\) {) N
+(        worlds.get\(client.getWorld\(\)\).delThing\(client.getLocation\(\), thing\);) N
+(GameServerImplementation.java) (Page 2/4) (Mar 13, 17 13:31) title
+border
+grestore
+(Printed by Martin) rhead
+(GameServerImplementation.java) (6/14) (Monday March 13, 2017) footer
+end % of iso1dict
+pagesave restore
+showpage
+%%Page: (3-4) 7
+%%BeginPageSetup
+/pagesave save def
+sh 0 translate 90 rotate
+%%EndPageSetup
+iso1dict begin
+gsave
+llx lly 12 add translate
+/v 0 store
+/x0 x v get 3.362408 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(        client.carry\(thing\);) p n
+(        updatePlayers\(client.getLocation\(\), client.getWorld\(\), ""\);) N
+(      } ) S
+(else) K
+( {) p n
+(        status\(client, ") S
+(Invalid Item Selection) str
+("\);) p n
+(        response = ) S
+(false) k
+(;) p n
+(      }) N
+(    } ) S
+(catch) K
+( \(Exception e\) { System.out.println\(") p
+(pick: ) str
+(" + e\); ) p
+(return) K
+( ) p
+(false) k
+(; }) p n
+(    ) S
+(return) K
+( response;) p n
+(  }) S
+(//to pick up a thing at the location) c n
+() p n
+(  ) S
+(public) K
+( Boolean drop\(ClientInterface client, String thing\) {) p n
+(    Boolean response  = ) S
+(true) k
+(;) p n
+(    ) S
+(try) K
+( {) p n
+(      Boolean has = client.drop\(thing\);) N
+(      ) S
+(if) K
+( \(has.equals\() p
+(true) k
+(\)\) {) p n
+(        worlds.get\(client.getWorld\(\)\).addThing\(client.getLocation\(\), thing\);) N
+(        updatePlayers\(client.getLocation\(\), client.getWorld\(\), ""\);) N
+(      } ) S
+(else) K
+( {) p n
+(        status\(client, \(") S
+(You do not have a ) str
+(" + thing + ") p
+( to drop.) str
+("\)\);) p n
+(        response = ) S
+(false) k
+(;) p n
+(      }) N
+(    } ) S
+(catch) K
+( \(Exception e\) { System.out.println\(") p
+(drop: ) str
+(" + e\); ) p
+(return) K
+( ) p
+(false) k
+(; }) p n
+(    ) S
+(return) K
+( response;) p n
+(  }) S
+(//to drop a thing) c n
+() p n
+(  ) S
+(public) K
+( Boolean messaging \(ClientInterface client, String text\){) p n
+(    ) S
+(try) K
+({) p n
+(      ) S
+(for) K
+( \(ClientInterface dude : clients\){) p n
+(      dude.printmess\(") S
+(Global Chat:) str
+(" + ") p
+( ) str
+(" + client.getName\(\) + ") p
+( said: ) str
+(" + text\);) p n
+(      ) S
+(//System.out.println\(text\);) c n
+(    }) p n
+(    }) S
+(//sends message to global chat) c n
+() p n
+(    ) S
+(catch) K
+( \(Exception e\) { System.err.println\(e.getMessage\(\)\); ) p
+(return) K
+( ) p
+(false) k
+(; }) p n
+(    ) S
+(return) K
+( ) p
+(true) k
+(;) p n
+(  }) N
+() N
+(  ) S
+(public) K
+( Boolean messagingsomeone \(ClientInterface player, String who, String te) p n
+(xt\){) N
+(    ) S
+(try) K
+({) p n
+(      ) S
+(for) K
+( \(ClientInterface client : clients\)  {) p n
+(          ) S
+(if) K
+( \(client.getName\(\).equals\(who\)\) {) p n
+(            client.printmess\(") S
+(Private Chat:) str
+(" + ") p
+( ) str
+(" + player.getName\(\) + ") p
+( said: ) str
+(" + tex) p n
+(t\);) N
+(            ) S
+(return) K
+( ) p
+(true) k
+(;) p n
+(          }) N
+(      }) N
+(    }) N
+(    ) S
+(catch) K
+( \(Exception e\) { System.err.println\(e.getMessage\(\)\); ) p
+(return) K
+( ) p
+(false) k
+(; }) p n
+(    ) S
+(return) K
+( ) p
+(true) k
+(;) p n
+(  }) S
+(//sends message to a single player) c n
+() p n
+() S 8 T () S
+(public) K
+( Boolean move\(ClientInterface client, String dir\) {) p n
+(    ) S
+(try) K
+({) p n
+(      String endpoint = worlds.get\(client.getWorld\(\)\).moveThing\(client.getLocati) N
+(on\(\), dir, client.getName\(\)\);) N
+(      ) S
+(//updatePlayers\(client.getLocation\(\), client.getWorld\(\), ""\);) c n
+(      client.setLocation\(endpoint\);) p n
+(      updatePlayers\(endpoint, client.getWorld\(\), ""\);) N
+(    } ) S
+(catch) K
+( \(Exception e\) { System.out.println\(") p
+(pick: ) str
+(" + e\); ) p
+(return) K
+( ) p
+(false) k
+(; }) p n
+(    ) S
+(return) K
+( ) p
+(true) k
+(;) p n
+(  ) S 8 T (}) S
+(//moves player from position to position) c n
+(GameServerImplementation.java) (Page 3/4) (Mar 13, 17 13:31) title
+border
+/v 1 store
+/x0 x v get 3.362408 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(  ) p 8 T () S 16 T () N
+(  ) S
+(private) K
+( ) p
+(void) k
+( updatePlayers\(String location, String world, String message\) {) p n
+(    ) S
+(try) K
+( {) p n
+(      ) S
+(for) K
+(\(ClientInterface client : clients\)  {) p n
+(        ) S
+(if) K
+( \(client.getLocation\(\).equals\(location\) && client.getWorld\(\).equals\(wo) p n
+(rld\)\) {) N
+(          status\(client, message\);) N
+(         ) N
+(        }) N
+(      }) N
+(    } ) S
+(catch) K
+( \(Exception e\) { System.out.println\(") p
+(updatePlayers: ) str
+(" + e\); }) p n
+(  ) S 8 T (}) N
+() N
+(  ) S
+(private) K
+( Boolean isClient\(String thing\) {) p n
+(    ) S
+(try) K
+( {) p n
+(      ) S
+(for) K
+(\(ClientInterface client : clients\)  {) p n
+(        ) S
+(if) K
+( \(client.getName\(\).equals\(thing\)\) {) p n
+(          ) S
+(return) K
+( ) p
+(true) k
+(;) p n
+(        }) N
+(      }) N
+(    } ) S
+(catch) K
+( \(Exception e\) { System.out.println\(") p
+(isPlayer: ) str
+(" + e\); }) p n
+(    ) S
+(return) K
+( ) p
+(false) k
+(;) p n
+(  ) S 8 T (}) S
+(//checks if an object is a player) c n
+() p n
+(  ) S
+(public) K
+( Boolean removePlayer\(ClientInterface player\) {) p n
+(    ) S
+(try) K
+( {) p n
+(      String pname = player.getName\(\);) N
+(      String pWorld = player.getWorld\(\);) N
+(      clients.remove\(player\);) N
+(      System.out.println\(pname + ") S
+( left ) str
+(" + pWorld\);) p n
+(      ) S
+(for) K
+( \(ClientInterface dude : clients\){) p n
+(      dude.printmess\(pname + ") S
+( has left the game) str
+("\);) p n
+(      ) S
+(//System.out.println\(text\);) c n
+(      }) p n
+(      ) N
+(    } ) N
+(    ) S
+(catch) K
+( \(Exception e\) { System.out.println\(") p
+(removePlayer: ) str
+(" + e\); ) p
+(return) K
+( ) p
+(false) k
+(; }) p n
+(    ) N
+(    ) S
+(return) K
+( ) p
+(false) k
+(;) p n
+(  }) N
+() N
+() N
+() N
+(}) S
+(GameServerImplementation.java) (Page 4/4) (Mar 13, 17 13:31) title
+border
+grestore
+(Printed by Martin) rhead
+(GameServerImplementation.java) (7/14) (Monday March 13, 2017) footer
+end % of iso1dict
+pagesave restore
+showpage
+%%Page: (1) 8
+%%BeginPageSetup
+/pagesave save def
+sh 0 translate 90 rotate
+%%EndPageSetup
+iso1dict begin
+gsave
+llx lly 12 add translate
+/v 0 store
+/x0 x v get 3.362408 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(/*) c n
+( @author: Martin, 51444972) N
+( @version: 1.0.1) N
+() N
+(*/) N
+(package) K
+( mud.cs3524.solutions.mud;) p n
+() N
+(import) K
+( java.rmi.Remote;) p n
+(import) K
+( java.util.List;) p n
+(import) K
+( java.rmi.RemoteException;) p n
+() N
+(public) K
+( ) p
+(interface) K
+( ) p
+(GameServerInterface) L
+( ) p
+(extends) K
+( Remote) p n
+({) N
+() S 8 T () S
+(public) K
+( Boolean messaging\(ClientInterface client, String text\) ) p
+(throws) K
+( jav) p n
+(a.rmi.RemoteException;) N
+() S 8 T () S
+(public) K
+( List<String> getWorlds\(\) ) p
+(throws) K
+( java.rmi.RemoteException;) p n
+() S 8 T () S
+(public) K
+( Boolean pick\(ClientInterface client, String thing\) ) p
+(throws) K
+( java.rm) p n
+(i.RemoteException;) N
+() S 8 T () S
+(public) K
+( String createWorld\(List<String> markup\) ) p
+(throws) K
+( java.rmi.RemoteExc) p n
+(eption;) N
+() S 8 T () S
+(public) K
+( ) p
+(void) k
+( exportWorlds\(\) ) p
+(throws) K
+( java.rmi.RemoteException;) p n
+() S 8 T () S
+(public) K
+( Boolean drop\(ClientInterface client, String thing\) ) p
+(throws) K
+( java.rm) p n
+(i.RemoteException;) N
+() S 8 T () S
+(public) K
+( ) p
+(void) k
+( status\(ClientInterface client, String message\) ) p
+(throws) K
+( java.r) p n
+(mi.RemoteException;) N
+() S 8 T () S
+(public) K
+( Boolean spawn\(ClientInterface client, String world\) ) p
+(throws) K
+( java.r) p n
+(mi.RemoteException;) N
+() S 8 T () S
+(public) K
+( Boolean move\(ClientInterface client, String dir\) ) p
+(throws) K
+( java.rmi.) p n
+(RemoteException;) N
+() S 8 T () S
+(public) K
+( Boolean messagingsomeone\(ClientInterface client, String who, Stri) p n
+(ng text\) ) S
+(throws) K
+( java.rmi.RemoteException;) p n
+() S 8 T () S
+(public) K
+( Boolean removePlayer\(ClientInterface player\) ) p
+(throws) K
+( java.rmi.Remo) p n
+(teException;) N
+(}) N
+(/* declaring all the functions needed on the Server side, the functions messagin) c n
+(g and messaging someone are the ones that are additional for the A4-A1*/) S
+(GameServerInterface.java) (Page 1/1) (Mar 13, 17 13:32) title
+border
+grestore
+(Printed by Martin) rhead
+(GameServerInterface.java) (8/14) (Monday March 13, 2017) footer
+end % of iso1dict
+pagesave restore
+showpage
+%%Page: (1) 9
+%%BeginPageSetup
+/pagesave save def
+sh 0 translate 90 rotate
+%%EndPageSetup
+iso1dict begin
+gsave
+llx lly 12 add translate
+/v 0 store
+/x0 x v get 3.362408 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(/*) c n
+( @author: Martin, 51444972) N
+( @version: 1.0.1) N
+() N
+(*/) N
+() p n
+() N
+(package) K
+( mud.cs3524.solutions.mud;) p n
+(import) K
+( java.rmi.Naming;) p n
+(import) K
+( java.rmi.RMISecurityManager;) p n
+(import) K
+( java.net.InetAddress;) p n
+() N
+(/*the server mainline, binds as a stub to the rmi adress so it can be called by ) c n
+(client, hostaname is set to ) N
+(localhost, security is again rmishout that grants all priviledges) N
+(*/) N
+(public) K
+( ) p
+(class) K
+( ) p
+(GameServerMainline) L n
+({) p n
+(    ) S
+(public) K
+( ) p
+(static) K
+( ) p
+(void) k
+( main\(String args[]\)) p n
+(    {) N
+() S 8 T () S
+(if) K
+( \(args.length < 2\) {) p n
+() S 8 T (    System.err.println\( ") S
+(Usage:\\njava GameServerMainline <registryport> <serverport>) str
+(" \) ) p n
+(;) N
+() S 8 T (    ) S
+(return) K
+(;) p n
+() S 8 T (}) N
+() N
+() S 8 T () S
+(try) K
+( {) p n
+() S 8 T (    String hostname = \(InetAddress.getLocalHost\(\)\).getCanonicalHostName\() N
+(\) ;) N
+() S 8 T (    ) S
+(int) k
+( registryport = Integer.parseInt\( args[0] \) ;) p n
+() S 8 T (    ) S
+(int) k
+( serverport = Integer.parseInt\( args[1] \) ;) p n
+() S 8 T () N
+() S 8 T (    System.setProperty\( ") S
+(java.security.policy) str
+(", ") p
+(rmishout.policy) str
+(" \) ;) p n
+() S 8 T (    System.setSecurityManager\( ) S
+(new) K
+( RMISecurityManager\(\) \) ;) p n
+() N
+(        GameServerImplementation serv = ) S
+(new) K
+( GameServerImplementation\(\);) p n
+() N
+(        GameServerInterface stub = \(GameServerInterface\)java.rmi.server.UnicastR) N
+(emoteObject.exportObject\( serv, serverport \);) N
+(        Naming.rebind\( ") S
+(rmi://) str
+(" + hostname + ") p
+(:) str
+(" + registryport + ") p
+(/GameServerMainline) str
+(") p n
+(, stub \);) N
+() S 8 T () N
+(        System.out.println\(") S
+(Server is running) str
+("\);) p n
+() N
+() S 8 T (}) N
+() S 8 T () S
+(catch) K
+(\(java.net.UnknownHostException e\) {) p n
+() S 8 T (    System.err.println\( ") S
+(It seems that Java can't determine the local host!) str
+(" \);) p n
+() S 8 T (}) N
+() S 8 T () S
+(catch) K
+( \(java.io.IOException e\) {) p n
+(            System.out.println\( ") S
+(Failed to register.) str
+(" \);) p n
+(        }) N
+(    }) N
+(}) N
+(//java mud.cs3524.solutions.mud.GameServerMainline 50011 50012) c n
+(//java mud.cs3524.solutions.mud.ClientMainline localhost 50011 50013) N
+(GameServerMainline.java) (Page 1/1) (Mar 13, 17 13:31) title
+border
+grestore
+(Printed by Martin) rhead
+(GameServerMainline.java) (9/14) (Monday March 13, 2017) footer
+end % of iso1dict
+pagesave restore
+showpage
+%%Page: (1) 10
+%%BeginPageSetup
+/pagesave save def
+sh 0 translate 90 rotate
+%%EndPageSetup
+iso1dict begin
+gsave
+llx lly 12 add translate
+/v 0 store
+/x0 x v get 3.362408 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(/*) c n
+( @author: Martin, 51444972) N
+( @version: 1.0.1) N
+() N
+(*/) N
+() p n
+(package) K
+( mud.cs3524.solutions.mud;) p n
+() N
+(import) K
+( java.util.Map;) p n
+(import) K
+( java.util.HashMap;) p n
+(import) K
+( java.util.List;) p n
+(import) K
+( java.util.Vector;) p n
+(import) K
+( java.util.Iterator;) p n
+() N
+(// Represents a location in the MUD \(a vertex in the graph\).) c n
+(class) K
+( ) p
+(Vertex) L n
+({) p n
+(    ) S
+(public) K
+( String _name;             ) p
+(// Vertex name) c n
+(    ) p
+(public) K
+( String _msg = "";         ) p
+(// Message about this location) c n
+(    ) p
+(public) K
+( Map<String,Edge> _routes; ) p
+(// Association between direction) c n
+() p 8 T () S 16 T () S 24 T () S 32 T (     ) S
+(// \(e.g. "north"\) and a path) c n
+() p 8 T () S 16 T () S 24 T () S 32 T (     ) S
+(// \(Edge\)) c n
+(    ) p
+(public) K
+( List<String> _things;     ) p
+(// The things \(e.g. players\) at) c n
+() p 8 T () S 16 T () S 24 T () S 32 T (     ) S
+(// this location) c n
+() p n
+(    ) S
+(public) K
+( Vertex\( String nm \)) p n
+(    {) N
+() S 8 T (_name = nm; ) N
+() S 8 T (_routes = ) S
+(new) K
+( HashMap<String,Edge>\(\); ) p
+(// Not synchronised) c n
+() p 8 T (_things = ) S
+(new) K
+( Vector<String>\(\);       ) p
+(// Synchronised) c n
+(    }) p n
+() N
+(}) N
+() N
+(/*another file that was provided*/) c
+(Vertex.java) (Page 1/1) (Mar 13, 17 13:32) title
+border
+grestore
+(Printed by Martin) rhead
+(Vertex.java) (10/14) (Monday March 13, 2017) footer
+end % of iso1dict
+pagesave restore
+showpage
+%%Page: (1-2) 11
+%%BeginPageSetup
+/pagesave save def
+sh 0 translate 90 rotate
+%%EndPageSetup
+iso1dict begin
+gsave
+llx lly 12 add translate
+/v 0 store
+/x0 x v get 3.362408 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(/*) c n
+( @author: Martin, 51444972) N
+( @version: 1.0.1) N
+() N
+(*/) N
+() p n
+() N
+() N
+(package) K
+( mud.cs3524.solutions.mud;) p n
+() N
+(import) K
+( java.io.FileReader;) p n
+(import) K
+( java.io.BufferedReader;) p n
+(import) K
+( java.io.IOException;) p n
+(import) K
+( java.util.StringTokenizer;) p n
+(import) K
+( java.util.Scanner;) p n
+(import) K
+( java.util.Iterator;) p n
+(import) K
+( java.util.List;) p n
+(import) K
+( java.util.Map;) p n
+(import) K
+( java.util.Vector;) p n
+(import) K
+( java.util.HashMap;) p n
+(import) K
+( java.io.File;) p n
+(import) K
+( java.io.PrintWriter;) p n
+(import) K
+( java.util.Arrays;) p n
+() N
+(/**) C n
+( * A class that can be used to represent a MUD; essenially, this is a) N
+( * graph.) N
+( */) N
+() p n
+(public) K
+( ) p
+(class) K
+( ) p
+(World) L n
+({) p n
+(    ) S
+(/**) C n
+(     * Private stuff) N
+(     */) N
+(    ) p
+(public) K
+( String _name = ") p
+(Generic World) str
+(";) p n
+(    ) S
+(// A record of all the vertices in the MUD graph. HashMaps are not) c n
+(    ) p
+(// synchronized, but we don't really need this to be synchronised.) c n
+(    ) p
+(private) K
+( Map<String,Vertex> vertexMap = ) p
+(new) K
+( HashMap<String,Vertex>\(\);) p n
+() N
+(    ) S
+(private) K
+( String _startLocation = "";) p n
+() N
+(    ) S
+(/**) C n
+(     * Add a new edge to the graph.) N
+(     */) N
+(    ) p
+(private) K
+( ) p
+(void) k
+( addEdge\( String sourceName, ) p n
+() S 8 T () S 16 T () S 24 T (  String destName, ) N
+() S 8 T () S 16 T () S 24 T (  String direction, ) N
+() S 8 T () S 16 T () S 24 T (  String view \)) N
+(    {) N
+(        Vertex v = getOrCreateVertex\( sourceName \);) N
+(        Vertex w = getOrCreateVertex\( destName \);) N
+(        v._routes.put\( direction, ) S
+(new) K
+( Edge\( w, view \) \);) p n
+(    }) N
+() N
+(    ) S
+(/**) C n
+(     * Create a new thing at a location.) N
+(     */) N
+(    ) p
+(private) K
+( ) p
+(void) k
+( createThing\( String loc, ) p n
+() S 8 T () S 16 T () S 24 T (      String thing \)) N
+(    {) N
+() S 8 T (Vertex v = getOrCreateVertex\( loc \);) N
+() S 8 T (v._things.add\( thing \);) N
+(World.java) (Page 1/7) (Mar 13, 17 13:32) title
+border
+/v 1 store
+/x0 x v get 3.362408 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(    }) p n
+() N
+(    ) S
+(/**) C n
+(     * Change the message associated with a location.) N
+(     */) N
+(    ) p
+(private) K
+( ) p
+(void) k
+( changeMessage\( String loc, String msg \)) p n
+(    {) N
+() S 8 T (Vertex v = getOrCreateVertex\( loc \);) N
+() S 8 T (v._msg = msg;) N
+(    }) N
+() N
+(    ) S
+(/**) C n
+(     * If vertexName is not present, add it to vertexMap.  In either) N
+(     * case, return the Vertex. Used only for creating the MUD.) N
+(     */) N
+(    ) p
+(private) K
+( Vertex getOrCreateVertex\( String vertexName \)) p n
+(    {) N
+(        Vertex v = vertexMap.get\( vertexName \);) N
+(        ) S
+(if) K
+( \(v == ) p
+(null) k
+(\) {) p n
+(            v = ) S
+(new) K
+( Vertex\( vertexName \);) p n
+(            vertexMap.put\( vertexName, v \);) N
+(        }) N
+(        ) S
+(return) K
+( v;) p n
+(    }) N
+() N
+(    ) S
+(public) K
+( String startLocation\(\){) p n
+(        ) S
+(return) K
+( _startLocation;) p n
+(    }) N
+(    ) S
+(/**) C n
+(     *) N
+(     */) N
+(    ) p
+(private) K
+( Vertex getVertex\( String vertexName \)) p n
+(    {) N
+() S 8 T () S
+(return) K
+( vertexMap.get\( vertexName \);) p n
+(    }) N
+(    ) S
+(private) K
+( ) p
+(void) k
+( saveEdge\(String[] attributes\) {) p n
+(        String message = "";) N
+(        ) S
+(for) K
+(\(String n: Arrays.copyOfRange\(attributes, 4, attributes.length\)\) mess) p n
+(age += n + ") S
+( ) str
+(";) p n
+(        addEdge\(attributes[1], attributes[3], attributes[2], message.trim\(\)\);) N
+(    }) N
+() N
+(    ) S
+(private) K
+( ) p
+(void) k
+( saveMessage\(String[] attributes\) {) p n
+(        String message = "";) N
+(        ) S
+(for) K
+(\(String n: Arrays.copyOfRange\(attributes, 2, attributes.length\)\) mess) p n
+(age += n + ") S
+( ) str
+(";) p n
+(        changeMessage\(attributes[1], message.trim\(\)\);) N
+(    }) N
+() N
+(    ) S
+(private) K
+( ) p
+(void) k
+( saveThing\(String[] attributes\) {) p n
+(        String message = "";) N
+(        ) S
+(for) K
+(\(String n: Arrays.copyOfRange\(attributes, 2, attributes.length\)\) mess) p n
+(age += n + ") S
+( ) str
+(";) p n
+(        addThing\(attributes[1], message.trim\(\)\);) N
+(    }) N
+(    ) S
+(private) K
+( ) p
+(void) k
+( loadRecord\(String record\) {) p n
+(        String[] attributes = record.split\(") S
+( ) str
+("\);) p n
+(        ) S
+(if) K
+( \(attributes[0].equals\(") p
+(name:) str
+("\)\)) p n
+(            _name = attributes[1];) N
+(        ) S
+(if) K
+( \(attributes[0].equals\(") p
+(edge:) str
+("\)\)) p n
+(            saveEdge\(attributes\);) N
+(        ) S
+(if) K
+( \(attributes[0].equals\(") p
+(message:) str
+("\)\)) p n
+(World.java) (Page 2/7) (Mar 13, 17 13:32) title
+border
+grestore
+(Printed by Martin) rhead
+(World.java) (11/14) (Monday March 13, 2017) footer
+end % of iso1dict
+pagesave restore
+showpage
+%%Page: (3-4) 12
+%%BeginPageSetup
+/pagesave save def
+sh 0 translate 90 rotate
+%%EndPageSetup
+iso1dict begin
+gsave
+llx lly 12 add translate
+/v 0 store
+/x0 x v get 3.362408 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(            saveMessage\(attributes\);) p n
+(        ) S
+(if) K
+( \(attributes[0].equals\(") p
+(thing:) str
+("\)\)) p n
+(            saveThing\(attributes\);) N
+(        ) S
+(if) K
+( \(attributes[0].equals\(") p
+(start:) str
+("\)\)) p n
+(            _startLocation = attributes[1];) N
+(    }) N
+(    ) S
+(/**) C n
+(     * Creates the edges of the graph on the basis of a file with the) N
+(     * following fromat:) N
+(     * source direction destination message) N
+(     */) N
+(    ) p
+(private) K
+( ) p
+(void) k
+( createEdges\( String edgesfile \)) p n
+(    {) N
+() S 8 T () S
+(try) K
+( {) p n
+() S 8 T (    FileReader fin = ) S
+(new) K
+( FileReader\( edgesfile \);) p n
+(            BufferedReader edges = ) S
+(new) K
+( BufferedReader\( fin \);) p n
+(            String line;) N
+(            ) S
+(while) K
+(\(\(line = edges.readLine\(\)\) != ) p
+(null) k
+(\) {) p n
+(                StringTokenizer st = ) S
+(new) K
+( StringTokenizer\( line \);) p n
+() S 8 T () S 16 T () S
+(if) K
+(\( st.countTokens\( \) < 3 \) {) p n
+() S 8 T () S 16 T (    System.err.println\( ") S
+(Skipping ill-formatted line ) str
+(" + line \);) p n
+() S 8 T () S 16 T (    ) S
+(continue) K
+(;) p n
+() S 8 T () S 16 T (}) N
+() S 8 T () S 16 T (String source = st.nextToken\(\);) N
+() S 8 T () S 16 T (String dir    = st.nextToken\(\);) N
+() S 8 T () S 16 T (String dest   = st.nextToken\(\);) N
+() S 8 T () S 16 T (String msg = "";) N
+() S 8 T () S 16 T () S
+(while) K
+( \(st.hasMoreTokens\(\)\) {) p n
+() S 8 T () S 16 T (    msg = msg + st.nextToken\(\) + ") S
+( ) str
+("; ) p n
+(                }) N
+() S 8 T () S 16 T (addEdge\( source, dest, dir, msg \);) N
+() S 8 T (    }) N
+() S 8 T (}) N
+() S 8 T () S
+(catch) K
+(\( IOException e \) {) p n
+() S 8 T (    System.err.println\( ") S
+(Graph.createEdges\( String ) str
+(" + ) p n
+() S 8 T () S 16 T () S 24 T () S 32 T (edgesfile + ") S
+(\)\\n) str
+(" + e.getMessage\(\) \);) p n
+() S 8 T (}) N
+(    }) N
+() N
+(    ) S
+(/**) C n
+(     * Records the messages assocated with vertices in the graph on) N
+(     * the basis of a file with the following format:) N
+(     * location message) N
+(     * The first location is assumed to be the starting point for) N
+(     * users joining the MUD.) N
+(     */) N
+(    ) p
+(private) K
+( ) p
+(void) k
+( recordMessages\( String messagesfile \)) p n
+(    {) N
+() S 8 T () S
+(try) K
+( {) p n
+() S 8 T (    FileReader fin = ) S
+(new) K
+( FileReader\( messagesfile \);) p n
+(            BufferedReader messages = ) S
+(new) K
+( BufferedReader\( fin \);) p n
+(            String line;) N
+() S 8 T (    ) S
+(boolean) k
+( first = ) p
+(true) k
+(; ) p
+(// For recording the start location.) c n
+(            ) p
+(while) K
+(\(\(line = messages.readLine\(\)\) != ) p
+(null) k
+(\) {) p n
+(                StringTokenizer st = ) S
+(new) K
+( StringTokenizer\( line \);) p n
+() S 8 T () S 16 T () S
+(if) K
+(\( st.countTokens\( \) < 2 \) {) p n
+() S 8 T () S 16 T (    System.err.println\( ") S
+(Skipping ill-formatted line ) str
+(" + line \);) p n
+() S 8 T () S 16 T (    ) S
+(continue) K
+(;) p n
+() S 8 T () S 16 T (}) N
+() S 8 T () S 16 T (String loc = st.nextToken\(\);) N
+() S 8 T () S 16 T (String msg = "";) N
+() S 8 T () S 16 T () S
+(while) K
+( \(st.hasMoreTokens\(\)\) {) p n
+(World.java) (Page 3/7) (Mar 13, 17 13:32) title
+border
+/v 1 store
+/x0 x v get 3.362408 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+() p 8 T () S 16 T (    msg = msg + st.nextToken\(\) + ") S
+( ) str
+("; ) p n
+(                }) N
+() S 8 T () S 16 T (changeMessage\( loc, msg \);) N
+() S 8 T () S 16 T () S
+(if) K
+( \(first\) {      ) p
+(// Record the start location.) c n
+() p 8 T () S 16 T (    _startLocation = loc;) N
+() S 8 T () S 16 T (    first = ) S
+(false) k
+(;) p n
+() S 8 T () S 16 T (}) N
+() S 8 T (    }) N
+() S 8 T (}) N
+() S 8 T () S
+(catch) K
+(\( IOException e \) {) p n
+() S 8 T (    System.err.println\( ") S
+(Graph.recordMessages\( String ) str
+(" + ) p n
+() S 8 T () S 16 T () S 24 T () S 32 T (messagesfile + ") S
+(\)\\n) str
+(" + e.getMessage\(\) \);) p n
+() S 8 T (}) N
+(    }) N
+() N
+(    ) S
+(/**) C n
+(     * Records the things assocated with vertices in the graph on) N
+(     * the basis of a file with the following format:) N
+(     * location thing1 thing2 ...) N
+(     */) N
+(    ) p
+(private) K
+( ) p
+(void) k
+( recordThings\( String thingsfile \)) p n
+(    {) N
+() S 8 T () S
+(try) K
+( {) p n
+() S 8 T (    FileReader fin = ) S
+(new) K
+( FileReader\( thingsfile \);) p n
+(            BufferedReader things = ) S
+(new) K
+( BufferedReader\( fin \);) p n
+(            String line;) N
+(            ) S
+(while) K
+(\(\(line = things.readLine\(\)\) != ) p
+(null) k
+(\) {) p n
+(                StringTokenizer st = ) S
+(new) K
+( StringTokenizer\( line \);) p n
+() S 8 T () S 16 T () S
+(if) K
+(\( st.countTokens\( \) < 2 \) {) p n
+() S 8 T () S 16 T (    System.err.println\( ") S
+(Skipping ill-formatted line ) str
+(" + line \);) p n
+() S 8 T () S 16 T (    ) S
+(continue) K
+(;) p n
+() S 8 T () S 16 T (}) N
+() S 8 T () S 16 T (String loc = st.nextToken\(\);) N
+() S 8 T () S 16 T () S
+(while) K
+( \(st.hasMoreTokens\(\)\) {) p n
+() S 8 T () S 16 T (    addThing\( loc, st.nextToken\(\)\); ) N
+(                }) N
+() S 8 T (    }) N
+() S 8 T (}) N
+() S 8 T () S
+(catch) K
+(\( IOException e \) {) p n
+() S 8 T (    System.err.println\( ") S
+(Graph.recordThings\( String ) str
+(" + ) p n
+() S 8 T () S 16 T () S 24 T () S 32 T (thingsfile + ") S
+(\)\\n) str
+(" + e.getMessage\(\) \);) p n
+() S 8 T (}) N
+(    }) N
+() N
+(    ) S
+(/**) C n
+(     * All the public stuff. These methods are designed to hide the) N
+(     * internal structure of the MUD. Could declare these on an) N
+(     * interface and have external objects interact with the MUD via) N
+(     * the interface.) N
+(     */) N
+() p n
+(    ) S
+(/**) C n
+(     * A constructor that creates the MUD.) N
+(     */) N
+(    ) p
+(public) K
+( World\( String worldfile \)) p n
+(    {) N
+() S 8 T () S
+(try) K
+( {) p n
+(        Scanner sc = ) S
+(new) K
+( Scanner\() p
+(new) K
+( File\(worldfile\)\);) p n
+(        ) S
+(while) K
+( \(sc.hasNextLine\(\)\) {) p n
+(            loadRecord\(sc.nextLine\(\)\);) N
+(        }) N
+(      }) N
+(World.java) (Page 4/7) (Mar 13, 17 13:32) title
+border
+grestore
+(Printed by Martin) rhead
+(World.java) (12/14) (Monday March 13, 2017) footer
+end % of iso1dict
+pagesave restore
+showpage
+%%Page: (5-6) 13
+%%BeginPageSetup
+/pagesave save def
+sh 0 translate 90 rotate
+%%EndPageSetup
+iso1dict begin
+gsave
+llx lly 12 add translate
+/v 0 store
+/x0 x v get 3.362408 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(      ) p
+(catch) K
+(\(java.io.FileNotFoundException e\) { System.out.println\(e.getMessage\(\)) p n
+(\); }) N
+() N
+(      System.out.println\(") S
+(Imported: ) str
+(" + _name + ") p
+( \() str
+(" + vertexMap.size\(\) + ") p
+( locations\)) str
+("\)) p n
+(;) N
+(    }) N
+() N
+(    ) S
+(public) K
+( World\(List<String> markup\) {) p n
+(        ) S
+(for) K
+(\(String statement : markup\) {) p n
+(        loadRecord\(statement\);) N
+(        }) N
+(    }) N
+() N
+(    ) S
+(// This method enables us to display the entire MUD \(mostly used) c n
+(    ) p
+(// for testing purposes so that we can check that the structure) c n
+(    ) p
+(// defined has been successfully parsed.) c n
+(    ) p
+(public) K
+( String toString\(\)) p n
+(    {) N
+() S 8 T (String summary = "";) N
+() S 8 T (Iterator iter = vertexMap.keySet\(\).iterator\(\);) N
+() S 8 T (String loc;) N
+() S 8 T () S
+(while) K
+( \(iter.hasNext\(\)\) {) p n
+() S 8 T (    loc = \(String\)iter.next\(\);) N
+() S 8 T (    summary = summary + ") S
+(Node: ) str
+(" + loc;) p n
+() S 8 T (    summary += \(\(Vertex\)vertexMap.get\( loc \)\).toString\(\);) N
+() S 8 T (}) N
+() S 8 T (summary += ") S
+(Start location = ) str
+(" + _startLocation;) p n
+() S 8 T () S
+(return) K
+( summary;) p n
+(    }) N
+() N
+(    ) S
+(/**) C n
+(     * A method to provide a string describing a particular location.) N
+(     */) N
+(    ) p
+(public) K
+( String locationInfo\( String loc \)) p n
+(    {) N
+() S 8 T () S
+(return) K
+( getVertex\( loc \).toString\(\);) p n
+(    }) N
+(    ) S
+(public) K
+( String locationStatus\(String loc\) {) p n
+(        String summary = getVertex\(loc\)._msg + ") S
+(\\n) str
+(";) p n
+(        ) S
+(for) K
+(\(Map.Entry<String, Edge> vertex : getVertex\(loc\)._routes.entrySet\(\)\) ) p n
+({) N
+(            summary += ") S
+(To the ) str
+(" + vertex.getKey\(\) + ") p
+( there is ) str
+(" + vertex.getValue\(\).) p n
+(_view + ") S
+(\\n) str
+(";) p n
+(        }) N
+(        ) S
+(return) K
+( summary;) p n
+(    }) N
+(    ) S
+(/**) C n
+(     * Get the start location for new MUD users.) N
+(     */) N
+(    ) p n
+(    ) S
+(public) K
+( List<String> locationThings\(String loc\) {) p n
+(        ) S
+(return) K
+( getVertex\(loc\)._things;) p n
+(    }) N
+(    ) S
+(/**) C n
+(     * Add a thing to a location; used to enable us to add new users.) N
+(     */) N
+(    ) p
+(public) K
+( ) p
+(void) k
+( addThing\( String loc,) p n
+() S 8 T () S 16 T () S 24 T (  String thing \)) N
+(    {) N
+() S 8 T (Vertex v = getVertex\( loc \);) N
+() S 8 T (v._things.add\( thing \);) N
+(    }) N
+(World.java) (Page 5/7) (Mar 13, 17 13:32) title
+border
+/v 1 store
+/x0 x v get 3.362408 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+() p n
+(    ) S
+(/**) C n
+(     * Remove a thing from a location.) N
+(     */) N
+(    ) p
+(public) K
+( ) p
+(void) k
+( delThing\( String loc, ) p n
+() S 8 T () S 16 T () S 24 T (  String thing \)) N
+(    {) N
+() S 8 T (Vertex v = getVertex\( loc \);) N
+() S 8 T (v._things.remove\( thing \);) N
+(    }) N
+() N
+(    ) S
+(/**) C n
+(     * A method to enable a player to move through the MUD \(a player) N
+(     * is a thing\). Checks that there is a route to travel on. Returns) N
+(     * the location moved to.) N
+(     */) N
+(    ) p
+(public) K
+( String moveThing\( String loc, String dir, String thing \)) p n
+(    {) N
+() S 8 T (Vertex v = getVertex\( loc \);) N
+() S 8 T (Edge e = v._routes.get\( dir \);) N
+() S 8 T () S
+(if) K
+( \(e == ) p
+(null) k
+(\)   ) p
+(// if there is no route in that direction) c n
+() p 8 T (    ) S
+(return) K
+( loc;  ) p
+(// no move is made; return current location.) c n
+() p 8 T (v._things.remove\( thing \);) N
+() S 8 T (e._dest._things.add\( thing \);) N
+() S 8 T () S
+(return) K
+( e._dest._name;) p n
+(    }) N
+() N
+(    ) S
+(public) K
+( ) p
+(void) k
+( export\(\) {) p n
+(    System.out.println\(") S
+(Saving: ) str
+(" + _name\);) p n
+(    ) S
+(try) K
+( {) p n
+(      PrintWriter writer = ) S
+(new) K
+( PrintWriter\(_name.toLowerCase\(\) + ") p
+(.world) str
+(", ") p
+(UTF-8) str
+() p n
+("\);) N
+(      ) S
+(// name) c n
+(      writer.println\(") p
+(name: ) str
+(" + _name + ") p
+(\\n) str
+("\);) p n
+(      ) S
+(// edges) c n
+(      ) p
+(for) K
+(\(Map.Entry<String, Vertex> vertex : vertexMap.entrySet\(\)\) {) p n
+(        ) S
+(for) K
+(\(Map.Entry<String, Edge> route : getVertex\(vertex.getKey\(\)\)._routes.e) p n
+(ntrySet\(\)\) {) N
+(          writer.println\(") S
+(edge: ) str
+(" + vertex.getKey\(\) + ") p
+( ) str
+(" + route.getKey\(\) + ") p
+( ) str
+(" + ) p n
+(route.getValue\(\)._dest._name + ") S
+( ) str
+(" + route.getValue\(\)._view\);) p n
+(        }) N
+(      }) N
+(      writer.println\(""\);) N
+(      ) S
+(// messages) c n
+(      ) p
+(for) K
+(\(Map.Entry<String, Vertex> vertex : vertexMap.entrySet\(\)\) {) p n
+(        writer.println\(") S
+(message: ) str
+(" + vertex.getKey\(\) + ") p
+( ) str
+(" + vertex.getValue\(\)._msg) p n
+(\);) N
+(      }) N
+(      writer.println\(""\);) N
+(      ) S
+(// things) c n
+(      ) p
+(for) K
+(\(Map.Entry<String, Vertex> vertex : vertexMap.entrySet\(\)\) {) p n
+(        ) S
+(for) K
+(\(String thing : vertex.getValue\(\)._things\) {) p n
+(          writer.println\(") S
+(thing: ) str
+(" + vertex.getKey\(\) + ") p
+( ) str
+(" + thing\);) p n
+(        }) N
+(      }) N
+(      ) S
+(// start) c n
+(      writer.println\(") p
+(\\nstart: ) str
+(" + _startLocation\);) p n
+(      writer.close\(\);) N
+(    }) N
+(    ) S
+(catch) K
+(\(java.io.FileNotFoundException e\) { System.out.println\(e.getMessage\(\)\);) p n
+( }) N
+(    ) S
+(catch) K
+(\(java.io.UnsupportedEncodingException e\) { System.out.println\(e.getMess) p n
+(World.java) (Page 6/7) (Mar 13, 17 13:32) title
+border
+grestore
+(Printed by Martin) rhead
+(World.java) (13/14) (Monday March 13, 2017) footer
+end % of iso1dict
+pagesave restore
+showpage
+%%Page: (7) 14
+%%BeginPageSetup
+/pagesave save def
+sh 0 translate 90 rotate
+%%EndPageSetup
+iso1dict begin
+gsave
+llx lly 12 add translate
+/v 0 store
+/x0 x v get 3.362408 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(age\(\)\); }) p n
+(  }) N
+(    ) S
+(/**) C n
+(     * A main method that can be used to testing purposes to ensure) N
+(     * that the MUD is specified correctly.) N
+(     */) N
+(}) p n
+(World.java) (Page 7/7) (Mar 13, 17 13:32) title
+border
+grestore
+(Printed by Martin) rhead
+(World.java) (14/14) (Monday March 13, 2017) footer
+end % of iso1dict
+pagesave restore
+showpage
+
+%%Trailer
+end
+%%EOF

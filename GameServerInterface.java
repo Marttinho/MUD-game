@@ -1,4 +1,8 @@
+/*
+ @author: Martin, 51444972
+ @version: 1.0.1
 
+*/
 package mud.cs3524.solutions.mud;
 
 import java.rmi.Remote;
@@ -9,6 +13,7 @@ public interface GameServerInterface extends Remote
 {
 	public Boolean messaging(ClientInterface client, String text) throws java.rmi.RemoteException;
 	public List<String> getWorlds() throws java.rmi.RemoteException;
+	public int getPlayers() throws java.rmi.RemoteException;
 	public Boolean pick(ClientInterface client, String thing) throws java.rmi.RemoteException;
 	public String createWorld(List<String> markup) throws java.rmi.RemoteException;
 	public void exportWorlds() throws java.rmi.RemoteException;
